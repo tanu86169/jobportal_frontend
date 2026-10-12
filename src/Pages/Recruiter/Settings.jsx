@@ -20,11 +20,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const SETTINGS_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/settings.php";
+import API_BASE from "../../Config/api";
 
-const PASSWORD_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/change-password.php";
+const SETTINGS_API = `${API_BASE}/recruiter/settings.php`;
+
+const PASSWORD_API = `${API_BASE}/recruiter/change-password.php`;
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("account");

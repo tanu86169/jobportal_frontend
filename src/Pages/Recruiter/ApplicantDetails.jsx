@@ -22,8 +22,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api/api";
+import API_BASE from "../../Config/api";
 
 const ApplicantDetails = () => {
   const navigate = useNavigate();

@@ -33,9 +33,299 @@ import {
    API
 ===================================================== */
 
-import { API_BASE, default as API_ROOT } from "../../config/api";
+import API_BASE from "../../config/api";
 
 const APPLICATION_DETAILS_API = `${API_BASE}/applications/get-candidate-application-by-id.php`;
+
+/* =====================================================
+   SKELETON PRIMITIVE
+===================================================== */
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+/* =====================================================
+   APPLICATION DETAILS SKELETON
+===================================================== */
+
+const ApplicationDetailsSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-slate-50">
+
+      {/* ===== TOP APPLICATION HEADER SKELETON ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+
+          <Skeleton className="mb-5 h-5 w-40" />
+
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-500" />
+
+            <div className="p-5 sm:p-7">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+
+                <div className="flex min-w-0 items-center gap-4">
+                  <Skeleton className="h-16 w-16 shrink-0 rounded-2xl" />
+
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-7 w-64 sm:h-8 sm:w-80" />
+                    <div className="flex flex-wrap gap-x-5 gap-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-40" />
+                    </div>
+                  </div>
+                </div>
+
+                <Skeleton className="h-10 w-32 shrink-0 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== MAIN CONTENT SKELETON ===== */}
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_340px]">
+
+          {/* ===== LEFT COLUMN ===== */}
+          <div className="space-y-6">
+
+            {/* Candidate Information */}
+            <SkeletonSectionHeader
+              title="Candidate Information"
+              subtitle="Information submitted with your application"
+              fields={4}
+            />
+
+            {/* Job Information */}
+            <SkeletonSectionHeader
+              title="Job Information"
+              subtitle="Details of the position you applied for"
+              fields={8}
+            />
+
+            {/* Job Description */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-6 w-40" />
+              </div>
+              <div className="mt-5 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+
+            {/* Responsibilities */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-6 w-36" />
+              </div>
+              <div className="mt-5 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="mt-2 h-2 w-2 shrink-0 rounded-full" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Requirements */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-6 w-44" />
+              </div>
+              <div className="mt-5 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="mt-1 h-4 w-4 shrink-0 rounded" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-6 w-36" />
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {[80, 64, 96, 72, 56, 88, 76].map((w, i) => (
+                  <Skeleton
+                    key={i}
+                    className="h-8 rounded-lg"
+                    style={{ width: `${w}px` }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Cover Letter */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-6 w-40" />
+              </div>
+              <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-5 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            </div>
+
+            {/* Documents */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-xl" />
+                  <Skeleton className="h-6 w-44" />
+                </div>
+                <Skeleton className="mt-2 h-3 w-56" />
+              </div>
+
+              <div className="space-y-3 p-6">
+                {Array.from({ length: 1 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-48" />
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 gap-2">
+                      <Skeleton className="h-8 w-16 rounded-lg" />
+                      <Skeleton className="h-8 w-24 rounded-lg" />
+                      <Skeleton className="h-8 w-9 rounded-lg" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* ===== RIGHT SIDEBAR ===== */}
+          <aside className="space-y-6">
+
+            {/* Status */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+
+              <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-5 w-5 shrink-0 rounded" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-5/6" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <Skeleton className="h-6 w-44" />
+
+              <div className="mt-5 space-y-5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="mt-0.5 h-5 w-5 shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Application ID */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Security */}
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+              <div className="flex gap-3">
+                <Skeleton className="mt-0.5 h-5 w-5 shrink-0 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-44" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-5/6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Back Button */}
+            <Skeleton className="h-12 w-full rounded-xl" />
+
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+/* =====================================================
+   SKELETON SECTION HEADER HELPER
+===================================================== */
+
+const SkeletonSectionHeader = ({ title, subtitle, fields = 4 }) => {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-6 py-5">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-xl" />
+          <Skeleton className="h-6 w-44" />
+        </div>
+        {subtitle && (
+          <Skeleton className="mt-2 h-3 w-60" />
+        )}
+      </div>
+
+      <div className="grid gap-4 p-6 sm:grid-cols-2">
+        {Array.from({ length: fields }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+          >
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="mt-2 h-4 w-32" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /* =====================================================
    USER HELPERS
@@ -603,29 +893,11 @@ const ApplicationDetails = () => {
   const finalStatuses = ["selected", "hired", "rejected"];
 
   /* ===================================================
-     LOADING
+     LOADING (SKELETON)
   =================================================== */
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <main className="flex min-h-screen items-center justify-center px-4">
-          <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
-
-            <h2 className="mt-5 text-xl font-bold text-slate-900">
-              Loading application
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Fetching your application details...
-            </p>
-          </div>
-        </main>
-      </div>
-    );
+    return <ApplicationDetailsSkeleton />;
   }
 
   /* ===================================================

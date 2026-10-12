@@ -29,12 +29,11 @@ import { useNavigate } from "react-router-dom";
 // =====================================================
 // API
 // =====================================================
+import API_BASE from "../../Config/api";
 
-const GET_NOTIFICATIONS_API =
-  "http://localhost/job_portal/job-portal-api/api/notifications/get.php";
+const GET_NOTIFICATIONS_API = `${API_BASE}/notifications/get.php`;
 
-const MARK_READ_API =
-  "http://localhost/job_portal/job-portal-api/api/notifications/mark-read.php";
+const MARK_READ_API = `${API_BASE}/notifications/mark-read.php`;
 
 // =====================================================
 // HELPERS
@@ -460,24 +459,81 @@ const Notifications = () => {
   // Loading
   // ---------------------------------------------------
 
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] bg-gray-50 p-6">
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
-            <Loader2
-              size={34}
-              className="mx-auto mb-3 animate-spin text-blue-600"
-            />
-            <p className="text-sm text-gray-500">
-              Loading recruiter notifications...
-            </p>
+  
+if (loading) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="mx-auto max-w-5xl animate-pulse">
+
+        {/* Header Skeleton */}
+        <section className="mb-6 rounded-[26px] bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-500 p-5 shadow-lg sm:p-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/20" />
+
+              <div className="flex-1">
+                <div className="h-3 w-28 rounded bg-white/30" />
+                <div className="mt-3 h-8 w-44 max-w-full rounded-lg bg-white/30" />
+                <div className="mt-3 h-4 w-72 max-w-full rounded bg-white/20" />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="h-16 w-36 rounded-xl bg-white/20" />
+              <div className="h-11 w-28 rounded-xl bg-white/30" />
+            </div>
+          </div>
+        </section>
+
+        {/* Section Heading and Filters */}
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="h-6 w-32 rounded bg-gray-200" />
+            <div className="mt-2 h-4 w-64 max-w-full rounded bg-gray-100" />
+          </div>
+
+          <div className="flex gap-2 rounded-xl border border-gray-200 bg-white p-2">
+            <div className="h-9 w-14 rounded-lg bg-blue-100" />
+            <div className="h-9 w-20 rounded-lg bg-gray-100" />
+            <div className="h-9 w-16 rounded-lg bg-gray-100" />
           </div>
         </div>
-      </div>
-    );
-  }
 
+        {/* Notification Card Skeletons */}
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((item) => (
+            <div
+              key={item}
+              className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
+            >
+              <div className="flex items-center gap-4">
+
+                {/* Notification Icon */}
+                <div className="h-12 w-12 shrink-0 rounded-2xl bg-blue-100" />
+
+                {/* Notification Details */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="h-4 w-36 max-w-full rounded bg-gray-200" />
+                    <div className="h-3 w-28 rounded bg-gray-100" />
+                  </div>
+
+                  <div className="mt-3 h-4 w-48 max-w-full rounded bg-gray-200" />
+
+                  <div className="mt-2 h-3 w-full max-w-lg rounded bg-gray-100" />
+                </div>
+
+                {/* Chevron Placeholder */}
+                <div className="h-5 w-5 shrink-0 rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
   // ---------------------------------------------------
   // Main UI
   // ---------------------------------------------------

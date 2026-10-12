@@ -1,6 +1,4 @@
-const API_ROOT =
-  "https://jobdhuno.infinityfreeapp.com/job-portal-api";
+const API_BASE = import.meta.env.VITE_API_URL;
 
-export const API_BASE = `${API_ROOT}/api`;
-
-export default API_ROOT;
+export { API_BASE };
+export default API_BASE;

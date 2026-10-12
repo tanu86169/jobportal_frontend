@@ -92,7 +92,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost/job_portal/job-portal-api/api/auth/register.php",
+        "import.meta.env.VITE_API_URL/api/auth/register.php",
         {
           name: formData.fullName,
           email: formData.email,

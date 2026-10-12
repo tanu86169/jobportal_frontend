@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -52,6 +53,9 @@ import RecruiterDashboard from "./Pages/Recruiter/RecruiterDashboard";
 import Applicants from "./Pages/Recruiter/Applicants";
 import ApplicantDetails from "./Pages/Recruiter/ApplicantDetails";
 import RecruiterMessages from "./Pages/Recruiter/RecruiterMessage";
+import RecruiterSettings from "./Pages/Recruiter/Settings";
+import RecruiterNotifications from "./Pages/Recruiter/Notifications";
+import FindCandidates from "./Pages/Recruiter/FindCandidates";
 
 import CompanyProfile from "./Pages/CompanyProfile";
 import PostJob from "./Pages/PostJob";
@@ -60,171 +64,115 @@ import ManageApplicants from "./Pages/ManageApplicants";
 import HiringAnalytics from "./Pages/HiringAnalytics";
 import EditJob from "./Pages/EditJob";
 
-import RecruiterSettings from "./Pages/Recruiter/Settings";
-import RecruiterNotifications from "./Pages/Recruiter/Notifications";
-import FindCandidates from "./Pages/Recruiter/FindCandidates";
-
 // =====================================================
 // SCROLL TO TOP
 // =====================================================
 
-const ScrollToTop = () => {
+function ScrollToTop() {
   const { pathname, search } = useLocation();
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "instant",
+      behavior: "auto",
     });
   }, [pathname, search]);
 
   return null;
-};
+}
+
+// =====================================================
+// 404 PAGE
+// =====================================================
+
+function NotFound() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="text-center">
+        <h1 className="text-6xl font-extrabold text-blue-600">
+          404
+        </h1>
+
+        <h2 className="mt-4 text-2xl font-bold text-gray-900">
+          Page Not Found
+        </h2>
+
+        <p className="mt-2 text-gray-500">
+          The page you are looking for does not exist.
+        </p>
+
+        <a
+          href="/"
+          className="mt-6 inline-flex rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
+  );
+}
 
 // =====================================================
 // APP
 // =====================================================
 
-const App = () => {
+export default function App() {
   return (
     <Router>
       <ScrollToTop />
 
       <div className="min-h-screen">
         <Routes>
-
-          {/* =================================================
-              PUBLIC ROUTES
-          ================================================= */}
+          {/* PUBLIC ROUTES */}
 
           <Route path="/" element={<Home />} />
-
           <Route path="/jobs" element={<FindJob />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/apply/:id" element={<ApplyJob />} />
+          <Route path="/jobs/:id/apply" element={<ApplyJob />} />
 
-          <Route
-            path="/companies"
-            element={<Companies />}
-          />
+          <Route path="/companies" element={<Companies />} />
+          <Route path="/companies/:id" element={<CompanyDetails />} />
 
-          <Route
-            path="/companies/:id"
-            element={<CompanyDetails />}
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          <Route
-            path="/jobs/:id"
-            element={<JobDetails />}
-          />
+          {/* CAREER ADVICE */}
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
-
-          {/* =================================================
-              CAREER ADVICE
-          ================================================= */}
-
-          {/* Career Advice Listing */}
-          <Route
-            path="/career-advice"
-            element={<CareerAdvice />}
-          />
-
-          {/* Career Advice Details */}
+          <Route path="/career-advice" element={<CareerAdvice />} />
           <Route
             path="/career-advice/:id"
             element={<CareerAdviceDetails />}
           />
 
-          <Route
-            path="/about"
-            element={<About />}
-          />
+          {/* OTHER PUBLIC PAGES */}
 
-          <Route
-            path="/contact"
-            element={<Contact />}
-          />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/help" element={<HelpsAndSupport />} />
 
-          <Route
-            path="/privacy-policy"
-            element={<PrivacyPolicy />}
-          />
+          {/* CANDIDATE ROUTES */}
 
-          <Route
-            path="/terms"
-            element={<TermsAndConditions />}
-          />
-
-          <Route
-            path="/help"
-            element={<HelpsAndSupport />}
-          />
-
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-          />
-
-          {/* =================================================
-              APPLY FOR JOB
-          ================================================= */}
-
-          <Route
-            path="/apply/:id"
-            element={<ApplyJob />}
-          />
-
-          <Route
-            path="/jobs/:id/apply"
-            element={<ApplyJob />}
-          />
-
-          {/* =================================================
-              CANDIDATE ROUTES
-          ================================================= */}
-
-          <Route
-            path="/candidate"
-            element={<CandidateLayout />}
-          >
-
+          <Route path="/candidate" element={<CandidateLayout />}>
             <Route
               path="dashboard"
               element={<CandidateDashboard />}
             />
 
-            <Route
-              path="profile"
-              element={<Profile />}
-            />
-
-            <Route
-              path="saved-jobs"
-              element={<SavedJobs />}
-            />
-
-            <Route
-              path="applications"
-              element={<AppliedJobs />}
-            />
+            <Route path="profile" element={<Profile />} />
+            <Route path="saved-jobs" element={<SavedJobs />} />
+            <Route path="applications" element={<AppliedJobs />} />
 
             <Route
               path="application/:id"
               element={<ApplicationDetails />}
             />
 
-            <Route
-              path="messages"
-              element={<Messages />}
-            />
+            <Route path="messages" element={<Messages />} />
 
             <Route
               path="notifications"
@@ -235,26 +183,19 @@ const App = () => {
               path="settings"
               element={<CandidateSettings />}
             />
-
           </Route>
 
-          {/* =================================================
-              RECRUITER ROUTES
-          ================================================= */}
+          {/* RECRUITER ROUTES */}
 
-          <Route
-            path="/recruiter"
-            element={<RecruiterLayout />}
-          >
-
-            <Route
-  path="find-candidates"
-  element={<FindCandidates />}
-/>
-
+          <Route path="/recruiter" element={<RecruiterLayout />}>
             <Route
               path="dashboard"
               element={<RecruiterDashboard />}
+            />
+
+            <Route
+              path="find-candidates"
+              element={<FindCandidates />}
             />
 
             <Route
@@ -262,15 +203,8 @@ const App = () => {
               element={<CompanyProfile />}
             />
 
-            <Route
-              path="post-job"
-              element={<PostJob />}
-            />
-
-            <Route
-              path="my-jobs"
-              element={<MyJobs />}
-            />
+            <Route path="post-job" element={<PostJob />} />
+            <Route path="my-jobs" element={<MyJobs />} />
 
             <Route
               path="applicants"
@@ -280,6 +214,11 @@ const App = () => {
             <Route
               path="applicant/:id"
               element={<ApplicantDetails />}
+            />
+
+            <Route
+              path="manage-applicants"
+              element={<ManageApplicants />}
             />
 
             <Route
@@ -298,11 +237,6 @@ const App = () => {
             />
 
             <Route
-              path="manage-applicants"
-              element={<ManageApplicants />}
-            />
-
-            <Route
               path="analytics"
               element={<HiringAnalytics />}
             />
@@ -311,45 +245,13 @@ const App = () => {
               path="edit-job/:id"
               element={<EditJob />}
             />
-
           </Route>
 
-          {/* =================================================
-              404 FALLBACK
-          ================================================= */}
+          {/* 404 FALLBACK */}
 
-          <Route
-            path="*"
-            element={
-              <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-                <div className="text-center">
-                  <h1 className="text-6xl font-extrabold text-blue-600">
-                    404
-                  </h1>
-
-                  <h2 className="mt-4 text-2xl font-bold text-gray-900">
-                    Page Not Found
-                  </h2>
-
-                  <p className="mt-2 text-gray-500">
-                    The page you are looking for does not exist.
-                  </p>
-
-                  <a
-                    href="/"
-                    className="mt-6 inline-flex rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
-                  >
-                    Go Home
-                  </a>
-                </div>
-              </div>
-            }
-          />
-
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>
   );
-};
-
-export default App;
+}

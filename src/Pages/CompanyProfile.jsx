@@ -26,8 +26,9 @@ import {
 // API
 // =========================================================
 
-const API_URL =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/company-profile.php";
+import API_BASE from "../Config/api";
+
+const API_URL = `${API_BASE}/recruiter/company-profile.php`;
 
 // =========================================================
 // STATUS CONFIG

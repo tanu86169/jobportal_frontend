@@ -25,12 +25,12 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import API_BASE from "../Config/api";
 
-const GET_MY_JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/get-my-jobs.php";
+const GET_MY_JOBS_API = `${API_BASE}/jobs/get-my-jobs.php`;
 
 const GET_RECRUITER_APPLICATIONS_API =
-  "http://localhost/job_portal/job-portal-api/api/applications/get-recruiter-applications.php";
+  `${API_BASE}/applications/get-recruiter-applications.php`;
 
 const HiringAnalytics = () => {
   const [user, setUser] = useState(null);

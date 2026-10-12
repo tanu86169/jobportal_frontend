@@ -17,8 +17,8 @@ import {
   Search,
 } from "lucide-react";
 
-const API_BASE_URL =
-  "http://localhost/job_portal/job-portal-api";
+import API_BASE from "../Config/api";
+
 
 const getLogoUrl = (logo) => {
   if (!logo) return "";
@@ -30,7 +30,7 @@ const getLogoUrl = (logo) => {
     return logo;
   }
 
-  return `${API_BASE_URL}/${logo.replace(/^\/+/, "")}`;
+  return `${API_BASE}/${logo.replace(/^\/+/, "")}`;
 };
 
 const getWebsiteUrl = (website) => {
@@ -68,7 +68,7 @@ const CompanyDetails = () => {
       setError("");
 
       const response = await axios.get(
-        `${API_BASE_URL}/api/companies/get-by-id.php?id=${id}`
+        `${API_BASE}/companies/get-by-id.php?id=${id}`
       );
 
       if (response.data.success) {

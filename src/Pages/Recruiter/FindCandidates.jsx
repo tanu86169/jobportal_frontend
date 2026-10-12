@@ -24,14 +24,13 @@ import {
   Briefcase,
 } from "lucide-react";
 
-const CANDIDATES_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/candidates.php";
+import API_BASE from "../../Config/api";
 
-const JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/jobs.php";
+const CANDIDATES_API = `${API_BASE}/recruiter/candidates.php`;
 
-const MATCH_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/candidate-match.php";
+const JOBS_API = `${API_BASE}/recruiter/jobs.php`;
+
+const MATCH_API = `${API_BASE}/recruiter/candidate-match.php`;
 
 const DEFAULT_LIMIT = 12;
 

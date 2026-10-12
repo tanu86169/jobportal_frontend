@@ -21,8 +21,7 @@ import {
 // API CONFIG
 // =====================================================
 
-const API_ROOT = "http://localhost/job_portal/job-portal-api";
-const API_BASE = `${API_ROOT}/api`;
+import { API_BASE } from "../Config/api";
 
 const JOBS_API = `${API_BASE}/jobs/get-all.php`;
 

@@ -17,11 +17,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api/api";
+import API_BASE from "../Config/api";
 
-const APPLICATIONS_API =
-  `${API_BASE}/recruiter/applications.php`;
+const APPLICATIONS_API = `${API_BASE}/recruiter/applications.php`;
 
 const ManageApplicants = () => {
   const [applications, setApplications] = useState([]);

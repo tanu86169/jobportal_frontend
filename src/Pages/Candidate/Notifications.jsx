@@ -27,11 +27,118 @@ import {
 // API URLS
 // =====================================================
 
-const GET_NOTIFICATIONS_API =
-  "http://localhost/job_portal/job-portal-api/api/notifications/get.php";
+import API_BASE from "../../Config/api";
 
-const MARK_READ_API =
-  "http://localhost/job_portal/job-portal-api/api/notifications/mark-read.php";
+const GET_NOTIFICATIONS_API = `${API_BASE}/notifications/get.php`;
+
+const MARK_READ_API = `${API_BASE}/notifications/mark-read.php`;
+
+// =====================================================
+// SKELETON PRIMITIVE
+// =====================================================
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+// =====================================================
+// NOTIFICATIONS SKELETON
+// =====================================================
+
+const NotificationsSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="mx-auto max-w-5xl">
+
+        {/* ===== HEADER SKELETON ===== */}
+        <section className="relative mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-600 to-cyan-500 p-5 shadow-sm sm:p-7">
+          <div className="relative flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-14 w-14 shrink-0 rounded-2xl !bg-white/20" />
+
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-32 !bg-white/20" />
+                <Skeleton className="h-7 w-48 !bg-white/25 sm:h-8 sm:w-56" />
+                <Skeleton className="h-4 w-64 !bg-white/15" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl border border-white/20 bg-white/15 px-4 py-2.5">
+                <Skeleton className="h-3 w-12 !bg-white/20" />
+                <Skeleton className="mt-1 h-6 w-8 !bg-white/25" />
+              </div>
+
+              <Skeleton className="h-12 w-32 rounded-xl !bg-white/20" />
+            </div>
+
+          </div>
+        </section>
+
+        {/* ===== FILTERS SKELETON ===== */}
+        <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-10 w-16 rounded-lg" />
+            <Skeleton className="h-10 w-20 rounded-lg" />
+            <Skeleton className="h-10 w-16 rounded-lg" />
+          </div>
+        </section>
+
+        {/* ===== THREAD LIST SKELETON ===== */}
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
+            >
+              <div className="flex items-center gap-4">
+
+                {/* Avatar */}
+                <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+
+                {/* Content */}
+                <div className="min-w-0 flex-1 space-y-2">
+
+                  {/* Name + time */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-5 w-8 rounded-full" />
+                    </div>
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+
+                  {/* Title */}
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 shrink-0 rounded" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+
+                  {/* Message preview */}
+                  <div className="flex items-center justify-between gap-3">
+                    <Skeleton className="h-3 w-full max-w-xs" />
+                    <Skeleton className="h-4 w-4 shrink-0 rounded" />
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+};
 
 // =====================================================
 // HELPERS
@@ -444,25 +551,11 @@ const Notifications = () => {
   };
 
   // ===================================================
-  // LOADING
+  // LOADING (SKELETON)
   // ===================================================
 
   if (loading) {
-    return (
-      <div className="min-h-[60vh] bg-gray-50 p-6">
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="text-center">
-            <Loader2
-              size={36}
-              className="mx-auto mb-3 animate-spin text-blue-600"
-            />
-            <p className="text-sm text-gray-500">
-              Loading your notifications...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <NotificationsSkeleton />;
   }
 
   // ===================================================
@@ -828,4 +921,3 @@ const Notifications = () => {
 };
 
 export default Notifications;
-

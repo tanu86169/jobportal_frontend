@@ -25,10 +25,159 @@ import {
 // API
 // ============================================================
 
-import { API_BASE, default as API_ROOT } from "../config/api";
+import API_BASE from "../Config/api";
 
 const MY_APPLICATIONS_API =
   `${API_BASE}/applications/my-applications.php`;
+
+// ============================================================
+// SKELETON PRIMITIVE
+// ============================================================
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+// ============================================================
+// APPLIED JOBS SKELETON
+// ============================================================
+
+const AppliedJobsSkeleton = () => {
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+
+      {/* ===== HERO SKELETON ===== */}
+      <section className="mx-4 mt-4 overflow-hidden rounded-[26px] border border-blue-100 bg-gradient-to-br from-blue-600 via-blue-600 to-cyan-500 shadow-lg shadow-blue-600/10 sm:mx-6 lg:mx-8">
+        <div className="relative px-5 py-6 sm:px-7 sm:py-8 lg:px-9 lg:py-9">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+            <div className="min-w-0 flex-1 space-y-3">
+              <Skeleton className="h-7 w-40 rounded-full !bg-white/20" />
+              <Skeleton className="h-8 w-56 !bg-white/25 sm:h-9 sm:w-64" />
+              <Skeleton className="h-4 w-full max-w-xl !bg-white/15" />
+              <Skeleton className="h-4 w-3/4 max-w-md !bg-white/15" />
+
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Skeleton className="h-7 w-32 rounded-full !bg-white/15" />
+                <Skeleton className="h-7 w-24 rounded-full !bg-white/15" />
+                <Skeleton className="h-7 w-28 rounded-full !bg-white/15" />
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              <Skeleton className="h-11 w-full rounded-xl !bg-white/20 sm:w-32" />
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CONTENT SKELETON ===== */}
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+
+        {/* STATISTICS */}
+        <div className="mb-6 grid grid-cols-2 gap-2.5 sm:mb-8 sm:gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-sm sm:rounded-2xl sm:p-5"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-16 sm:h-4 sm:w-20" />
+                  <Skeleton className="h-6 w-12 sm:h-8 sm:w-16" />
+                  <Skeleton className="hidden h-3 w-24 sm:block" />
+                </div>
+                <Skeleton className="h-9 w-9 rounded-lg sm:h-11 sm:w-11 sm:rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* SEARCH + FILTER */}
+        <div className="mb-5 rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-sm sm:mb-6 sm:rounded-2xl sm:p-5">
+          <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center lg:gap-4">
+            <Skeleton className="h-11 w-full rounded-xl lg:flex-1" />
+            <Skeleton className="h-11 w-full rounded-xl lg:w-52" />
+          </div>
+
+          <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </div>
+
+        {/* APPLICATION CARDS */}
+        <div className="space-y-3 sm:space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl"
+            >
+              {/* Status strip */}
+              <Skeleton className="h-1 w-full rounded-none" />
+
+              <div className="p-4 sm:p-5 lg:p-6">
+
+                {/* Top row */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+
+                  <div className="flex min-w-0 gap-3 sm:gap-3.5">
+                    {/* Logo */}
+                    <Skeleton className="h-11 w-11 shrink-0 rounded-xl sm:h-14 sm:w-14 sm:rounded-2xl" />
+
+                    {/* Title + Company */}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4 sm:h-6 sm:w-2/3" />
+                      <Skeleton className="h-4 w-40" />
+                    </div>
+                  </div>
+
+                  {/* Status badge */}
+                  <Skeleton className="h-7 w-24 shrink-0 rounded-full" />
+                </div>
+
+                {/* Meta row */}
+                <div className="mt-3.5 flex flex-wrap gap-x-3 gap-y-1.5 sm:mt-4 sm:gap-x-4 sm:gap-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+
+                {/* Skills */}
+                <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-3.5">
+                  <Skeleton className="h-6 w-16 rounded-md sm:rounded-lg" />
+                  <Skeleton className="h-6 w-20 rounded-md sm:rounded-lg" />
+                  <Skeleton className="h-6 w-14 rounded-md sm:rounded-lg" />
+                  <Skeleton className="h-6 w-18 rounded-md sm:rounded-lg" />
+                </div>
+
+                {/* Description */}
+                <div className="mt-3 rounded-lg bg-slate-50/80 px-3 py-2.5 sm:mt-3.5 sm:rounded-xl sm:px-3.5 sm:py-3">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="mt-1.5 h-3 w-5/6" />
+                </div>
+
+                {/* Actions */}
+                <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3.5 sm:mt-5 sm:flex-row sm:gap-2.5 sm:pt-4">
+                  <Skeleton className="h-10 w-full rounded-xl sm:w-32" />
+                  <Skeleton className="h-10 w-full rounded-xl sm:w-40" />
+                </div>
+
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </section>
+    </main>
+  );
+};
 
 // ============================================================
 // CURRENT USER
@@ -770,38 +919,11 @@ const AppliedJob = () => {
     ).length;
 
   // ==========================================================
-  // LOADING
+  // LOADING (SKELETON)
   // ==========================================================
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-        <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center px-4">
-          <div className="flex flex-col items-center gap-5 text-center">
-            <div className="relative">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/25 sm:h-16 sm:w-16">
-                <Loader2
-                  size={28}
-                  className="animate-spin text-white"
-                />
-              </div>
-
-              <div className="absolute -inset-1 -z-10 animate-pulse rounded-2xl bg-blue-200/40 blur-md" />
-            </div>
-
-            <div>
-              <p className="text-base font-semibold text-slate-800 sm:text-lg">
-                Loading your applications
-              </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Please wait a moment…
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+    return <AppliedJobsSkeleton />;
   }
 
   // ==========================================================

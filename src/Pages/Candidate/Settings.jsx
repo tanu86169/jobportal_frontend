@@ -22,8 +22,9 @@ import {
 // API
 // =====================================================
 
-const SETTINGS_API =
-  "http://localhost/job_portal/job-portal-api/api/candidate/settings.php";
+import API_BASE from "../../Config/api";
+
+const SETTINGS_API = `${API_BASE}/candidate/settings.php`;
 
 // =====================================================
 // COMPONENT

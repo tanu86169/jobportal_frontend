@@ -30,11 +30,9 @@ import Header from "../Components/Header";
 // API
 // =====================================================
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api";
+import API_BASE from "../Config/api";
 
-const ARTICLES_API =
-  `${API_BASE}/api/articles/get-all.php`;
+const ARTICLES_API = `${API_BASE}/articles/get-all.php`;
 
 // =====================================================
 // CATEGORY ICONS

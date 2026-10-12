@@ -26,19 +26,19 @@ import {
 // API
 // ======================================================
 
-const API_ROOT = "http://localhost/job_portal/job-portal-api";
+import API_BASE from "../Config/api";
 
-const JOBS_API = `${API_ROOT}/api/jobs/get-all.php`;
+const JOBS_API = `${API_BASE}/jobs/get-all.php`;
 
-const TRACK_JOB_VIEW_API = `${API_ROOT}/api/jobs/track-view.php`;
+const TRACK_JOB_VIEW_API = `${API_BASE}/jobs/track-view.php`;
 
-const CHECK_APPLICATION_API = `${API_ROOT}/api/applications/check.php`;
+const CHECK_APPLICATION_API = `${API_BASE}/applications/check.php`;
 
-const SAVE_JOB_API = `${API_ROOT}/api/savedJobs/save.php`;
+const SAVE_JOB_API = `${API_BASE}/savedJobs/save.php`;
 
-const GET_SAVED_JOB_API = `${API_ROOT}/api/savedJobs/get.php`;
+const GET_SAVED_JOB_API = `${API_BASE}/savedJobs/get.php`;
 
-const REMOVE_SAVED_JOB_API = `${API_ROOT}/api/savedJobs/remove.php`;
+const REMOVE_SAVED_JOB_API = `${API_BASE}/savedJobs/remove.php`;
 
 const recordJobView = (jobId) => {
   const storageKey = `job-view:${jobId}`;

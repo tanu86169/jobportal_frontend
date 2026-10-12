@@ -22,18 +22,18 @@ import { useSearchParams } from "react-router-dom";
 // =====================================================
 // API
 // =====================================================
+import API_BASE from "../../Config/api";
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api/api/messages";
+const MESSAGES_BASE = `${API_BASE}/messages`;
 
 const CONVERSATIONS_API =
-  `${API_BASE}/get-conversations.php`;
+  `${MESSAGES_BASE}/get-conversations.php`;
 
 const MESSAGES_API =
-  `${API_BASE}/get-messages.php`;
+  `${MESSAGES_BASE}/get-messages.php`;
 
 const SEND_MESSAGE_API =
-  `${API_BASE}/send-message.php`;
+  `${MESSAGES_BASE}/send-message.php`;
 
 // =====================================================
 // HELPERS
@@ -920,14 +920,32 @@ const RecruiterMessage = () => {
               overscroll-contain
             "
           >
-            {loading ? (
-              <div className="flex items-center justify-center h-40">
-                <Loader2
-                  size={26}
-                  className="animate-spin text-blue-600"
-                />
-              </div>
-            ) : filteredConversations.length === 0 ? (
+           
+{loading ? (
+  <div className="animate-pulse">
+    {[1, 2, 3, 4, 5, 6].map((item) => (
+      <div
+        key={item}
+        className="flex gap-3 border-b border-gray-100 px-4 py-4"
+      >
+        {/* Avatar skeleton */}
+        <div className="h-11 w-11 shrink-0 rounded-full bg-gray-200" />
+
+        {/* Candidate details skeleton */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <div className="h-4 w-32 max-w-full rounded bg-gray-200" />
+            <div className="h-3 w-10 rounded bg-gray-100" />
+          </div>
+
+          <div className="mt-2 h-3 w-40 max-w-full rounded bg-gray-100" />
+
+          <div className="mt-3 h-3 w-48 max-w-full rounded bg-gray-200" />
+        </div>
+      </div>
+    ))}
+  </div>
+) : filteredConversations.length === 0 ? (
               <div className="px-6 py-16 text-center">
                 <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
                   <UserRound
@@ -1232,14 +1250,36 @@ const RecruiterMessage = () => {
                   md:p-6
                 "
               >
-                {messagesLoading ? (
-                  <div className="min-h-full flex items-center justify-center">
-                    <Loader2
-                      size={28}
-                      className="animate-spin text-blue-600"
-                    />
-                  </div>
-                ) : messages.length === 0 ? (
+               
+{messagesLoading ? (
+  <div className="space-y-5 animate-pulse">
+    {/* Received message skeleton */}
+    <div className="flex justify-start">
+      <div className="max-w-[75%] space-y-2 rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3">
+        <div className="h-3 w-40 max-w-full rounded bg-gray-200" />
+        <div className="h-3 w-28 max-w-full rounded bg-gray-100" />
+        <div className="h-2 w-12 rounded bg-gray-100 ml-auto" />
+      </div>
+    </div>
+
+    {/* Sent message skeleton */}
+    <div className="flex justify-end">
+      <div className="max-w-[75%] space-y-2 rounded-2xl rounded-br-md bg-blue-100 px-4 py-3">
+        <div className="h-3 w-48 max-w-full rounded bg-blue-200" />
+        <div className="h-3 w-32 max-w-full rounded bg-blue-200" />
+        <div className="h-2 w-12 rounded bg-blue-200 ml-auto" />
+      </div>
+    </div>
+
+    {/* Another received message */}
+    <div className="flex justify-start">
+      <div className="max-w-[75%] rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3">
+        <div className="h-3 w-36 max-w-full rounded bg-gray-200" />
+        <div className="mt-2 h-3 w-24 max-w-full rounded bg-gray-100" />
+      </div>
+    </div>
+  </div>
+) : messages.length === 0 ? (
                   <div className="min-h-full flex items-center justify-center">
                     <div className="text-center max-w-sm">
                       <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center mx-auto">

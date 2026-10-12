@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
-import { API_BASE, default as API_ROOT } from "../../config/api";
+import API_BASE from "../../config/api";
 
 /* =========================================================
    API
@@ -37,6 +37,215 @@ import { API_BASE, default as API_ROOT } from "../../config/api";
 const PROFILE_API = `${API_BASE}/profile/get.php`;
 const DASHBOARD_API = `${API_BASE}/candidate/dashboard.php`;
 const APPLICATIONS_API = `${API_BASE}/applications/get-my-applications.php`;
+
+/* =========================================================
+   SKELETON PRIMITIVE
+========================================================= */
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+/* =========================================================
+   DASHBOARD SKELETON
+========================================================= */
+
+const DashboardSkeleton = () => {
+  return (
+    <div className="w-full space-y-5 pb-8 sm:space-y-6">
+
+      {/* ===== WELCOME HEADER SKELETON ===== */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-600 to-cyan-500 shadow-lg shadow-blue-600/20 sm:rounded-3xl">
+        <div className="relative flex flex-col items-start gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 sm:py-7 lg:px-8">
+
+          <div className="min-w-0 flex-1 space-y-3">
+            <Skeleton className="h-5 w-32 !bg-white/20" />
+            <Skeleton className="h-7 w-64 !bg-white/25 sm:h-8 sm:w-80" />
+            <Skeleton className="h-4 w-full max-w-md !bg-white/15" />
+            <Skeleton className="h-4 w-3/4 max-w-sm !bg-white/15" />
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Skeleton className="h-6 w-40 rounded-full !bg-white/15" />
+              <Skeleton className="h-6 w-28 rounded-full !bg-white/15" />
+            </div>
+          </div>
+
+          {/* Profile image skeleton */}
+          <div className="mx-auto flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 p-1.5 sm:mx-0 sm:h-28 sm:w-28 lg:h-32 lg:w-32">
+            <Skeleton className="h-full w-full rounded-full !bg-white/25" />
+          </div>
+
+        </div>
+      </section>
+
+      {/* ===== QUICK STATS SKELETON ===== */}
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm sm:p-5"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+                <Skeleton className="h-6 w-12 sm:h-8 sm:w-16" />
+              </div>
+              <Skeleton className="h-10 w-10 rounded-xl sm:h-12 sm:w-12" />
+            </div>
+            <Skeleton className="mt-3 h-3 w-14 sm:mt-4" />
+          </div>
+        ))}
+      </section>
+
+      {/* ===== PROFILE STRENGTH SKELETON ===== */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Skeleton className="h-12 w-12 rounded-2xl sm:h-14 sm:w-14" />
+            <div className="min-w-0 space-y-2">
+              <Skeleton className="h-3 w-24 sm:h-4" />
+              <Skeleton className="h-6 w-16 sm:h-7" />
+              <Skeleton className="h-3 w-48 sm:w-64" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-40 rounded-xl sm:h-12 sm:w-44" />
+        </div>
+        <Skeleton className="mt-4 h-2.5 w-full rounded-full sm:mt-5 sm:h-3" />
+      </section>
+
+      {/* ===== SKILLS SKELETON ===== */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-9 rounded-xl sm:h-10 sm:w-10" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-40 sm:h-5" />
+            <Skeleton className="h-3 w-52 sm:w-60" />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-2.5">
+          {[80, 64, 96, 72, 56, 88].map((w, i) => (
+            <Skeleton
+              key={i}
+              className="h-8 rounded-full sm:h-9"
+              style={{ width: `${w}px` }}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ===== RECOMMENDED JOBS SKELETON ===== */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+        <div className="mb-4 flex items-center justify-between sm:mb-5">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-44 sm:h-6" />
+            <Skeleton className="h-3 w-52 sm:w-60" />
+          </div>
+          <Skeleton className="h-6 w-20" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
+            >
+              <div className="flex items-start gap-3">
+                <Skeleton className="h-11 w-11 rounded-xl sm:h-12 sm:w-12" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="hidden h-6 w-16 rounded-lg sm:block" />
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+              <Skeleton className="mt-4 h-4 w-20" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== RECENT APPLICATIONS SKELETON ===== */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+        <div className="mb-4 flex items-center justify-between sm:mb-5">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-44 sm:h-6" />
+            <Skeleton className="h-3 w-52 sm:w-60" />
+          </div>
+          <Skeleton className="h-6 w-20" />
+        </div>
+        <div className="space-y-3 sm:space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-slate-200 p-4 sm:p-5"
+            >
+              <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex min-w-0 gap-3 sm:gap-4">
+                  <Skeleton className="h-11 w-11 rounded-xl sm:h-12 sm:w-12" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Skeleton className="h-5 w-48 sm:w-56" />
+                    <Skeleton className="h-3 w-36" />
+                    <Skeleton className="h-3 w-64" />
+                  </div>
+                </div>
+                <Skeleton className="h-7 w-24 rounded-full" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3 sm:grid-cols-3 sm:gap-4 sm:pt-4">
+                <div className="space-y-1.5">
+                  <Skeleton className="h-3 w-12" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <div className="space-y-1.5">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <div className="col-span-2 space-y-1.5 sm:col-span-1">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+              <div className="mt-3 flex justify-end sm:mt-4">
+                <Skeleton className="h-8 w-24 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== NOTIFICATIONS SKELETON ===== */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-9 rounded-xl sm:h-10 sm:w-10" />
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-36 sm:h-6" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+        <div className="mt-4 space-y-3 sm:mt-5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 sm:p-4"
+            >
+              <Skeleton className="h-9 w-9 shrink-0 rounded-xl sm:h-10 sm:w-10" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+    </div>
+  );
+};
 
 /* =========================================================
    CANDIDATE DASHBOARD
@@ -772,25 +981,11 @@ const CandidateDashboard = () => {
   };
 
   /* =======================================================
-     LOADING
+     LOADING (SKELETON)
   ======================================================= */
 
   if (loading) {
-    return (
-      <div className="flex min-h-[500px] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-
-          <p className="mt-4 font-semibold text-slate-700">
-            Loading dashboard...
-          </p>
-
-          <p className="mt-1 text-sm text-slate-400">
-            Please wait
-          </p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   /* =======================================================

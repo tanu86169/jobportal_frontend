@@ -25,24 +25,17 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-/* =========================================================
-   API URLs
-========================================================= */
+import API_BASE from "../Config/api";
 
-const API_URL =
-  "http://localhost/job_portal/job-portal-api/api/jobs/create.php";
+const API_URL = `${API_BASE}/jobs/create.php`;
 
-const JOB_TYPES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/job-types.php";
+const JOB_TYPES_API = `${API_BASE}/options/job-types.php`;
 
-const WORKPLACE_TYPES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/workplace-types.php";
+const WORKPLACE_TYPES_API = `${API_BASE}/options/workplace-types.php`;
 
-const COMPANY_PROFILE_API =
-  "http://localhost/job_portal/job-portal-api/api/recruiter/company-profile.php";
+const COMPANY_PROFILE_API = `${API_BASE}/recruiter/company-profile.php`;
 
-const CATEGORIES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/categories.php";
+const CATEGORIES_API = `${API_BASE}/options/categories.php`;
 
 /* =========================================================
    Initial Form
@@ -92,10 +85,10 @@ const getLogoUrl = (logo) => {
   }
 
   if (value.startsWith("uploads/")) {
-    return `http://localhost/job_portal/job-portal-api/${value}`;
+    return `import.meta.env.VITE_API_URL/${value}`;
   }
 
-  return `http://localhost/job_portal/job-portal-api/uploads/${value}`;
+  return `import.meta.env.VITE_API_URL/uploads/${value}`;
 };
 
 /* =========================================================
@@ -221,11 +214,17 @@ const PostJob = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
-    if (!storedUser) {
-      alert("Please login as a recruiter first.");
-      navigate("/login", { replace: true });
-      return;
-    }
+    const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("Your session has expired. Please login again.");
+  localStorage.removeItem("user");
+  localStorage.removeItem("isLoggedIn");
+  navigate("/login", { replace: true });
+  return;
+}
+
+   
 
     try {
       const user = JSON.parse(storedUser);
@@ -761,506 +760,340 @@ const PostJob = () => {
      Submit Job
   ========================================================= */
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    if (loading) return;
+  if (loading) return;
 
-    /* -------------------------------------------------------
-       Session
-    ------------------------------------------------------- */
+  /* -------------------------------------------------------
+     SESSION + JWT TOKEN
+  ------------------------------------------------------- */
 
-    const storedUser =
-      localStorage.getItem("user");
+  const storedUser = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
 
-    if (!storedUser) {
-      alert("Please login as a recruiter first.");
-      navigate("/login");
+  if (!storedUser || !token) {
+    alert("Your session has expired. Please login again.");
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("token");
+
+    navigate("/login", { replace: true });
+    return;
+  }
+
+  let user;
+
+  try {
+    user = JSON.parse(storedUser);
+  } catch (error) {
+    console.error("User Parse Error:", error);
+
+    alert("Invalid session. Please login again.");
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("token");
+
+    navigate("/login", { replace: true });
+    return;
+  }
+
+  /* -------------------------------------------------------
+     USER VALIDATION
+  ------------------------------------------------------- */
+
+  if (!user?.id) {
+    alert("Recruiter ID not found. Please login again.");
+    return;
+  }
+
+  if (String(user?.role || "").toLowerCase() !== "recruiter") {
+    alert("Only recruiters can post jobs.");
+    return;
+  }
+
+  /* -------------------------------------------------------
+     COMPANY APPROVAL CHECK
+  ------------------------------------------------------- */
+
+  const currentCompanyStatus = String(
+    user?.company_status || companyStatus || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (currentCompanyStatus !== "approved") {
+    const message =
+      user?.company_message ||
+      companyMessage ||
+      getStatusMessage(currentCompanyStatus);
+
+    alert(message);
+    return;
+  }
+
+  if (!canPostJob) {
+    alert("Your company is not approved. You cannot post jobs.");
+    return;
+  }
+
+  /* -------------------------------------------------------
+     FORM VALIDATION
+  ------------------------------------------------------- */
+
+  if (!formData.jobTitle.trim()) {
+    alert("Please enter job title.");
+    return;
+  }
+
+  if (!formData.companyName.trim()) {
+    alert("Please complete your Company Profile first.");
+    return;
+  }
+
+  if (!formData.category) {
+    alert("Please select job category.");
+    return;
+  }
+
+  if (!formData.jobType) {
+    alert("Please select job type.");
+    return;
+  }
+
+  if (!formData.location.trim()) {
+    alert("Please enter job location.");
+    return;
+  }
+
+  const vacancies = Number(formData.vacancies);
+
+  if (!Number.isInteger(vacancies) || vacancies < 1) {
+    alert("Number of openings must be at least 1.");
+    return;
+  }
+
+  if (!formData.description.trim()) {
+    alert("Please enter job description.");
+    return;
+  }
+
+  if (
+    formData.salaryMin &&
+    formData.salaryMax &&
+    Number(formData.salaryMin) > Number(formData.salaryMax)
+  ) {
+    alert("Minimum salary cannot be greater than maximum salary.");
+    return;
+  }
+
+  if (!Array.isArray(skills) || skills.length === 0) {
+    alert("Please add at least one required skill.");
+    return;
+  }
+
+  /* -------------------------------------------------------
+     PREPARE FORMDATA
+  ------------------------------------------------------- */
+
+  const postData = new FormData();
+
+  // Backend JWT se recruiter ID verify karega.
+  // Ye field backward compatibility ke liye bheji ja rahi hai.
+  postData.append("recruiter_id", String(Number(user.id)));
+
+  postData.append("job_title", formData.jobTitle.trim());
+  postData.append("company_name", formData.companyName.trim());
+  postData.append("location", formData.location.trim());
+  postData.append("vacancies", String(vacancies));
+  postData.append("job_type", formData.jobType);
+  postData.append("workplace_type", formData.workplaceType || "");
+  postData.append("category", formData.category);
+  postData.append("experience", formData.experience || "Fresher");
+  postData.append("education", formData.education.trim());
+  postData.append("salary", getSalary());
+  postData.append("description", formData.description.trim());
+  postData.append(
+    "responsibilities",
+    formData.responsibilities.trim()
+  );
+  postData.append("requirements", formData.requirements.trim());
+  postData.append("skills", skills.join(", "));
+  postData.append("deadline", formData.deadline || "");
+
+  if (logoFile) {
+    postData.append("company_logo", logoFile);
+  }
+
+  /* -------------------------------------------------------
+     DEBUG
+  ------------------------------------------------------- */
+
+  console.log("========== POST JOB DATA ==========");
+
+  for (const [key, value] of postData.entries()) {
+    if (value instanceof File) {
+      console.log(key, value.name, value.type, value.size);
+    } else {
+      console.log(key, value);
+    }
+  }
+
+  console.log("JWT token available:", Boolean(token));
+  console.log("===================================");
+
+  setLoading(true);
+
+  /* -------------------------------------------------------
+     API REQUEST
+  ------------------------------------------------------- */
+
+  try {
+    const response = await axios.post(API_URL, postData, {
+      timeout: 30000,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = response.data;
+
+    console.log("========== JOB POST RESPONSE ==========");
+    console.log("HTTP Status:", response.status);
+    console.log("Response Data:", data);
+    console.log("=======================================");
+
+    /* -----------------------------------------------------
+       SUCCESS
+    ----------------------------------------------------- */
+
+    if (data?.success === true) {
+      alert(data.message || "Job posted successfully!");
+
+      resetForm();
+      navigate("/recruiter/my-jobs");
+
       return;
     }
 
-    let user;
+    /* -----------------------------------------------------
+       BACKEND REPORTED FAILURE
+    ----------------------------------------------------- */
 
-    try {
-      user = JSON.parse(storedUser);
-    } catch (error) {
-      console.error(
-        "User Parse Error:",
-        error
-      );
-
-      alert(
-        "Invalid session. Please login again."
-      );
-
-      navigate("/login");
-      return;
-    }
-
-    /* -------------------------------------------------------
-       User Validation
-    ------------------------------------------------------- */
-
-    if (!user?.id) {
-      alert("Recruiter ID not found.");
-      navigate("/login");
-      return;
-    }
-
-    if (
-      user?.role?.toLowerCase() !==
-      "recruiter"
-    ) {
-      alert("Only recruiters can post jobs.");
-      return;
-    }
-
-    /* -------------------------------------------------------
-       COMPANY APPROVAL CHECK
-    ------------------------------------------------------- */
-
-    const currentCompanyStatus =
-      String(
-        user?.company_status ||
-          companyStatus ||
-          ""
-      )
-        .trim()
-        .toLowerCase();
-
-    /*
-      Frontend par bhi block karenge.
-      Backend par bhi same check hai.
-    */
-
-    if (
-      currentCompanyStatus !==
-      "approved"
-    ) {
-      const message =
-        user?.company_message ||
-        companyMessage ||
-        getStatusMessage(
-          currentCompanyStatus
-        );
-
-      alert(message);
-
-      return;
-    }
-
-    if (!canPostJob) {
-      alert(
-        "Your company is not approved. You cannot post jobs."
-      );
-
-      return;
-    }
-
-    /* -------------------------------------------------------
-       Form Validation
-    ------------------------------------------------------- */
-
-    if (!formData.jobTitle.trim()) {
-      alert("Please enter job title.");
-      return;
-    }
-
-    if (!formData.companyName.trim()) {
-      alert(
-        "Please complete your Company Profile first."
-      );
-      return;
-    }
-
-    if (!formData.category) {
-      alert("Please select job category.");
-      return;
-    }
-
-    if (!formData.jobType) {
-      alert("Please select job type.");
-      return;
-    }
-
-    if (!formData.location.trim()) {
-      alert("Please enter job location.");
-      return;
-    }
-
-    const vacancies = Number(
-      formData.vacancies
-    );
-
-    if (
-      !Number.isInteger(vacancies) ||
-      vacancies < 1
-    ) {
-      alert(
-        "Number of openings must be at least 1."
-      );
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      alert("Please enter job description.");
-      return;
-    }
-
-    if (
-      formData.salaryMin &&
-      formData.salaryMax &&
-      Number(formData.salaryMin) >
-        Number(formData.salaryMax)
-    ) {
-      alert(
-        "Minimum salary cannot be greater than maximum salary."
-      );
-      return;
-    }
-
-    if (skills.length === 0) {
-      alert(
-        "Please add at least one required skill."
-      );
-      return;
-    }
-
-    /* -------------------------------------------------------
-       FormData
-    ------------------------------------------------------- */
-
-    const postData = new FormData();
-
-    postData.append(
-      "recruiter_id",
-      String(Number(user.id))
-    );
-
-    postData.append(
-      "job_title",
-      formData.jobTitle.trim()
-    );
-
-    /*
-      Backend approved company name ko final authority
-      rakhega. Frontend se bhi company name bhej rahe hain
-      because existing API structure isi ko expect karta hai.
-    */
-
-    postData.append(
-      "company_name",
-      formData.companyName.trim()
-    );
-
-    postData.append(
-      "location",
-      formData.location.trim()
-    );
-
-    postData.append(
-      "vacancies",
-      String(vacancies)
-    );
-
-    postData.append(
-      "job_type",
-      formData.jobType
-    );
-
-    postData.append(
-      "workplace_type",
-      formData.workplaceType || ""
-    );
-
-    postData.append(
-      "category",
-      formData.category
-    );
-
-    postData.append(
-      "experience",
-      formData.experience || "Fresher"
-    );
-
-    postData.append(
-      "education",
-      formData.education.trim()
-    );
-
-    postData.append(
-      "salary",
-      getSalary()
-    );
-
-    postData.append(
-      "description",
-      formData.description.trim()
-    );
-
-    postData.append(
-      "responsibilities",
-      formData.responsibilities.trim()
-    );
-
-    postData.append(
-      "requirements",
-      formData.requirements.trim()
-    );
-
-    postData.append(
-      "skills",
-      skills.join(", ")
-    );
-
-    postData.append(
-      "deadline",
-      formData.deadline || ""
-    );
-
-    if (logoFile) {
-      postData.append(
-        "company_logo",
-        logoFile
-      );
-    }
-
-    /* -------------------------------------------------------
-       Debug FormData
-    ------------------------------------------------------- */
-
-    console.log(
-      "========== POST JOB DATA =========="
-    );
-
-    for (const [
-      key,
-      value,
-    ] of postData.entries()) {
-      if (value instanceof File) {
-        console.log(
-          key,
-          value.name,
-          value.type,
-          value.size
-        );
-      } else {
-        console.log(
-          key,
-          value
-        );
-      }
-    }
-
-    console.log(
-      "==================================="
-    );
-
-    setLoading(true);
-
-    /* -------------------------------------------------------
-       API Request
-    ------------------------------------------------------- */
-
-    try {
-      const response = await axios.post(
-        API_URL,
-        postData,
+    if (data?.company_status) {
+      refreshLocalCompanyStatus(
+        data.company_status,
+        data.message,
         {
-          timeout: 30000,
+          company_id: data.company_id,
+          company_name: data.company_name,
         }
       );
+    }
 
-      console.log(
-        "========== JOB POST RESPONSE =========="
-      );
-
-      console.log(
-        "HTTP Status:",
-        response.status
-      );
-
-      console.log(
-        "Response Data:",
-        response.data
-      );
-
-      console.log(
-        "Success:",
-        response.data?.success
-      );
-
-      console.log(
-        "Message:",
-        response.data?.message
-      );
-
-      console.log(
-        "Job ID:",
-        response.data?.jobId
-      );
-
-      console.log(
-        "======================================="
-      );
-
-      /* -----------------------------------------------------
-         Backend Success
-      ----------------------------------------------------- */
-
-      if (
-        response.data?.success === true
-      ) {
-        alert(
-          response.data?.message ||
-            "Job posted successfully!"
-        );
-
-        resetForm();
-
-        navigate(
-          "/recruiter/my-jobs"
-        );
-
-        return;
-      }
-
-      /* -----------------------------------------------------
-         Backend Success False
-      ----------------------------------------------------- */
-
-      console.error(
-        "Backend returned success=false:",
-        response.data
-      );
-
-      /*
-        Agar backend company status bhi bhej raha hai,
-        frontend ko latest status ke saath update karo.
-      */
-
-      if (
-        response.data?.company_status
-      ) {
-        refreshLocalCompanyStatus(
-          response.data.company_status,
-          response.data.message,
-          {
-            company_id:
-              response.data.company_id,
-            company_name:
-              response.data.company_name,
-          }
-        );
-      }
-
+    if (data?.code === "JOB_POSTING_DISABLED") {
       alert(
-        response.data?.message ||
-          response.data?.error ||
-          "Unable to post job. Please try again."
+        data.message ||
+          "Job posting is currently disabled by admin."
       );
-    } catch (error) {
-      console.error(
-        "========== CREATE JOB ERROR =========="
+      return;
+    }
+
+    if (
+      data?.code === "COMPANY_NOT_APPROVED" ||
+      data?.code === "NO_COMPANY" ||
+      data?.code === "COMPANY_NOT_FOUND"
+    ) {
+      alert(
+        data.message ||
+          "Please complete your company profile and get admin approval."
+      );
+      return;
+    }
+
+    alert(
+      data?.message ||
+        data?.error ||
+        "Unable to post job. Please try again."
+    );
+  } catch (error) {
+    console.error("========== CREATE JOB ERROR ==========");
+    console.error("Error:", error);
+    console.error("Response:", error.response?.data);
+    console.error("Status:", error.response?.status);
+    console.error("======================================");
+
+    const backendData = error.response?.data;
+    const backendMessage =
+      backendData?.message || backendData?.error;
+
+    /* -----------------------------------------------------
+       TOKEN INVALID / EXPIRED
+    ----------------------------------------------------- */
+
+    if (
+      error.response?.status === 401
+    ) {
+      alert(
+        backendMessage ||
+          "Your session has expired. Please login again."
       );
 
-      console.error(
-        "Error:",
-        error
-      );
+      localStorage.removeItem("user");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
 
-      console.error(
-        "Response:",
-        error.response?.data
-      );
+      navigate("/login", { replace: true });
+      return;
+    }
 
-      console.error(
-        "Status:",
-        error.response?.status
-      );
+    /* -----------------------------------------------------
+       ACCESS DENIED
+    ----------------------------------------------------- */
 
-      console.error(
-        "Request:",
-        error.request
-      );
-
-      console.error(
-        "======================================="
-      );
-
-      const backendData =
-        error.response?.data;
-
-      const backendMessage =
-        backendData?.message ||
-        backendData?.error;
-
-      /*
-        IMPORTANT:
-        Backend 403 COMPANY_NOT_APPROVED aaye to
-        latest company status UI me update hoga.
-      */
-
+    if (error.response?.status === 403) {
       if (
-        error.response?.status ===
-          403 &&
-        backendData?.code ===
-          "COMPANY_NOT_APPROVED"
+        backendData?.code === "COMPANY_NOT_APPROVED"
       ) {
-        const rejectedStatus =
-          String(
-            backendData?.company_status ||
-              "pending"
-          )
-            .trim()
-            .toLowerCase();
+        const rejectedStatus = String(
+          backendData?.company_status || "pending"
+        )
+          .trim()
+          .toLowerCase();
 
         refreshLocalCompanyStatus(
           rejectedStatus,
           backendMessage,
           {
-            company_id:
-              backendData?.company_id ||
-              null,
-            company_name:
-              backendData?.company_name ||
-              "",
+            company_id: backendData?.company_id || null,
+            company_name: backendData?.company_name || "",
           }
         );
 
         alert(
           backendMessage ||
-            getStatusMessage(
-              rejectedStatus
-            )
+            getStatusMessage(rejectedStatus)
         );
 
         return;
       }
 
-      /*
-        Global admin job posting setting disabled
-      */
-
       if (
-        backendData?.code ===
-        "JOB_POSTING_DISABLED"
+        backendData?.code === "JOB_POSTING_DISABLED"
       ) {
         alert(
           backendMessage ||
             "Job posting is currently disabled by admin."
         );
-
         return;
       }
 
-      /*
-        No company found
-      */
-
       if (
-        backendData?.code ===
-        "COMPANY_NOT_FOUND"
+        backendData?.code === "NO_COMPANY" ||
+        backendData?.code === "COMPANY_NOT_FOUND"
       ) {
         refreshLocalCompanyStatus(
           "pending",
@@ -1278,13 +1111,23 @@ const PostJob = () => {
 
       alert(
         backendMessage ||
-          "Unable to post job. Please try again."
+          "Access denied. Please check your account permissions."
       );
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
 
+    /* -----------------------------------------------------
+       OTHER ERRORS
+    ----------------------------------------------------- */
+
+    alert(
+      backendMessage ||
+        "Unable to post job. Please check your connection and try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   /* =========================================================
      Company Status UI
   ========================================================= */
@@ -1374,79 +1217,7 @@ const PostJob = () => {
             COMPANY APPROVAL STATUS
         ================================================= */}
 
-        <div className="mb-6">
-          {companyLoading ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="h-10 w-10 animate-pulse rounded-xl bg-gray-100" />
-
-              <div className="flex-1">
-                <div className="h-4 w-48 animate-pulse rounded bg-gray-100" />
-                <div className="mt-2 h-3 w-80 max-w-full animate-pulse rounded bg-gray-100" />
-              </div>
-            </div>
-          ) : statusConfig ? (
-            <div
-              className={`rounded-2xl border p-4 shadow-sm ${statusConfig.wrapper}`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${statusConfig.iconWrapper}`}
-                >
-                  <StatusIcon size={20} />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3
-                      className={`text-sm font-bold ${statusConfig.titleClass}`}
-                    >
-                      {statusConfig.title}
-                    </h3>
-
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${statusConfig.iconWrapper}`}
-                    >
-                      {normalizedCompanyStatus}
-                    </span>
-                  </div>
-
-                  <p
-                    className={`mt-1 text-sm ${statusConfig.textClass}`}
-                  >
-                    {companyMessage ||
-                      statusConfig.message}
-                  </p>
-
-                  {companyId && (
-                    <p
-                      className={`mt-1 text-xs opacity-70 ${statusConfig.textClass}`}
-                    >
-                      Company ID: {companyId}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-                  <AlertTriangle size={20} />
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-amber-900">
-                    Company Approval Required
-                  </h3>
-
-                  <p className="mt-1 text-sm text-amber-800">
-                    Please add your company and wait for admin approval before posting jobs.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+       
 
         <form
           id="post-job-form"

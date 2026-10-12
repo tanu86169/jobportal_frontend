@@ -24,17 +24,15 @@ import Header from "../Components/Header";
 // API URLs
 // =====================================================
 
-const JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/get-all.php";
+import API_BASE from "../Config/api";
 
-const SAVED_JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/savedJobs/get.php";
+const JOBS_API = `${API_BASE}/jobs/get-all.php`;
 
-const SAVE_JOB_API =
-  "http://localhost/job_portal/job-portal-api/api/savedJobs/save.php";
+const SAVED_JOBS_API = `${API_BASE}/savedJobs/get.php`;
 
-const REMOVE_SAVED_JOB_API =
-  "http://localhost/job_portal/job-portal-api/api/savedJobs/remove.php";
+const SAVE_JOB_API = `${API_BASE}/savedJobs/save.php`;
+
+const REMOVE_SAVED_JOB_API = `${API_BASE}/savedJobs/remove.php`;
 
 // =====================================================
 // Locations
@@ -1256,31 +1254,77 @@ const FindJobs = () => {
             )}
 
             {/* Error */}
-            {!loading && error && (
-              <div className="rounded-2xl border border-red-200 bg-white px-6 py-16 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
-                  <X className="h-7 w-7 text-red-500" />
-                </div>
+            
+{/* Loading Skeleton */}
+{loading && (
+  <div className="space-y-4" aria-label="Loading jobs">
+    {Array.from({ length: 6 }).map((_, index) => (
+      <div
+        key={index}
+        className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+      >
+        {/* Job Header: Logo, Title, Company, Save Button */}
+        <div className="flex gap-4">
+          {/* Company Logo Skeleton */}
+          <div className="h-14 w-14 shrink-0 rounded-xl bg-slate-200" />
 
-                <h3 className="text-lg font-bold text-red-600">
-                  Failed to load jobs
-                </h3>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 space-y-3">
+                {/* Job Title */}
+                <div className="h-5 w-3/4 rounded-md bg-slate-200" />
 
-                <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-                  {error}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.location.reload()
-                  }
-                  className="mt-5 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  Try Again
-                </button>
+                {/* Company Name */}
+                <div className="h-4 w-1/2 rounded-md bg-slate-200" />
               </div>
-            )}
+
+              {/* Bookmark Button */}
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-slate-200" />
+            </div>
+
+            {/* Job Details: Location, Salary, Experience */}
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-3">
+              <div className="h-4 w-28 rounded-md bg-slate-200" />
+              <div className="h-4 w-24 rounded-md bg-slate-200" />
+              <div className="h-4 w-24 rounded-md bg-slate-200" />
+            </div>
+
+            {/* Job Type, Work Mode, Industry Tags */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <div className="h-6 w-20 rounded-full bg-slate-200" />
+              <div className="h-6 w-16 rounded-full bg-slate-200" />
+              <div className="h-6 w-24 rounded-full bg-slate-200" />
+            </div>
+
+            {/* Job Description */}
+            <div className="mt-5 space-y-2">
+              <div className="h-3 w-full rounded-md bg-slate-200" />
+              <div className="h-3 w-5/6 rounded-md bg-slate-200" />
+            </div>
+
+            {/* Skills */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <div className="h-6 w-16 rounded-lg bg-slate-200" />
+              <div className="h-6 w-20 rounded-lg bg-slate-200" />
+              <div className="h-6 w-24 rounded-lg bg-slate-200" />
+              <div className="h-6 w-14 rounded-lg bg-slate-200" />
+            </div>
+
+            {/* Footer: Posted Date and Buttons */}
+            <div className="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="h-4 w-24 rounded-md bg-slate-200" />
+
+              <div className="flex gap-2">
+                <div className="h-10 w-28 rounded-xl bg-slate-200" />
+                <div className="h-10 w-24 rounded-xl bg-slate-200" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
             {/* Jobs */}
             {!loading &&

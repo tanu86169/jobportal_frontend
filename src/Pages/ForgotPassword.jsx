@@ -14,9 +14,10 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import API_BASE from "../Config/api";
 
-const RESET_PASSWORD_API =
-  "http://localhost/job_portal/job-portal-api/api/auth/reset-password.php";
+const RESET_PASSWORD_API = `${API_BASE}/auth/reset-password.php`;
+
 
 const ForgotPassword = () => {
   const navigate = useNavigate();

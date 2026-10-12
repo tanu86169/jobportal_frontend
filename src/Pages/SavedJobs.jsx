@@ -15,15 +15,115 @@ import {
 // ======================================================
 // API URLS
 // ======================================================
+import API_BASE from "../Config/api";
 
-const SAVED_JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/savedJobs/get.php";
+const SAVED_JOBS_API = `${API_BASE}/savedJobs/get.php`;
 
-const REMOVE_SAVED_JOB_API =
-  "http://localhost/job_portal/job-portal-api/api/savedJobs/remove.php";
+const REMOVE_SAVED_JOB_API = `${API_BASE}/savedJobs/remove.php`;
 
-const MY_APPLICATIONS_API =
-  "http://localhost/job_portal/job-portal-api/api/applications/my-applications.php";
+const MY_APPLICATIONS_API = `${API_BASE}/applications/my-applications.php`;
+
+// ======================================================
+// SKELETON PRIMITIVE
+// ======================================================
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+// ======================================================
+// SAVED JOBS SKELETON
+// ======================================================
+
+const SavedJobsSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <main className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+
+          {/* ===== HEADER SKELETON ===== */}
+          <section className="relative mb-8 overflow-hidden rounded-[28px] border border-blue-100 bg-gradient-to-br from-blue-600 via-blue-600 to-cyan-500 px-6 py-7 shadow-lg shadow-blue-600/15 sm:px-8 sm:py-8">
+            <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1 space-y-3">
+                <Skeleton className="h-7 w-40 rounded-full !bg-white/20" />
+                <Skeleton className="h-9 w-56 !bg-white/25 sm:h-10 sm:w-64" />
+                <Skeleton className="h-4 w-full max-w-xl !bg-white/15" />
+                <Skeleton className="h-4 w-3/4 max-w-md !bg-white/15" />
+              </div>
+              <div className="hidden shrink-0 sm:flex">
+                <Skeleton className="h-20 w-20 rounded-3xl !bg-white/20" />
+              </div>
+            </div>
+          </section>
+
+          {/* ===== SEARCH + COUNT SKELETON ===== */}
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Skeleton className="h-12 w-full rounded-xl sm:max-w-md" />
+              <Skeleton className="h-10 w-40 rounded-xl" />
+            </div>
+          </div>
+
+          {/* ===== JOB CARDS SKELETON ===== */}
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              >
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+                  {/* LEFT SIDE - JOB INFO */}
+                  <div className="flex min-w-0 flex-1 gap-4">
+                    <Skeleton className="h-14 w-14 shrink-0 rounded-xl" />
+
+                    <div className="min-w-0 flex-1 space-y-3">
+                      {/* Title */}
+                      <Skeleton className="h-5 w-3/4 sm:h-6 sm:w-2/3" />
+
+                      {/* Company */}
+                      <Skeleton className="h-4 w-40" />
+
+                      {/* Meta row */}
+                      <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+
+                      {/* Skills */}
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Skeleton className="h-6 w-16 rounded-md" />
+                        <Skeleton className="h-6 w-20 rounded-md" />
+                        <Skeleton className="h-6 w-14 rounded-md" />
+                        <Skeleton className="h-6 w-18 rounded-md" />
+                      </div>
+
+                      {/* Saved time */}
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+
+                  {/* RIGHT SIDE - ACTIONS */}
+                  <div className="flex gap-3 lg:min-w-[230px] lg:flex-col xl:flex-row">
+                    <Skeleton className="h-11 flex-1 rounded-xl" />
+                    <Skeleton className="h-11 flex-1 rounded-xl" />
+                  </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+};
 
 // ======================================================
 // COMPONENT
@@ -529,6 +629,14 @@ const SavedJobs = () => {
   };
 
   // ======================================================
+  // LOADING (SKELETON)
+  // ======================================================
+
+  if (loading) {
+    return <SavedJobsSkeleton />;
+  }
+
+  // ======================================================
   // UI
   // ======================================================
 
@@ -634,26 +742,10 @@ const SavedJobs = () => {
           </div>
 
           {/* =================================================
-              LOADING
-          ================================================= */}
-
-          {loading && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-
-              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-
-              <p className="mt-4 text-sm font-medium text-slate-500">
-                Loading saved jobs...
-              </p>
-
-            </div>
-          )}
-
-          {/* =================================================
               ERROR
           ================================================= */}
 
-          {!loading && error && (
+          {error && (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
 
               <p className="font-medium text-red-600">
@@ -675,8 +767,7 @@ const SavedJobs = () => {
               JOB LIST
           ================================================= */}
 
-          {!loading &&
-            !error &&
+          {!error &&
             filteredJobs.length > 0 && (
               <div className="space-y-4">
 
@@ -872,8 +963,7 @@ const SavedJobs = () => {
               EMPTY STATE
           ================================================= */}
 
-          {!loading &&
-            !error &&
+          {!error &&
             filteredJobs.length ===
               0 && (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">

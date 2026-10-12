@@ -24,18 +24,16 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../Components/Footer";
+import API_BASE from "../Config/api";
 
-const GET_MY_JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/get-my-jobs.php";
+const GET_MY_JOBS_API = `${API_BASE}/jobs/get-my-jobs.php`;
 
 const GET_RECRUITER_APPLICATIONS_API =
-  "http://localhost/job_portal/job-portal-api/api/applications/get-recruiter-applications.php";
+  `${API_BASE}/applications/get-recruiter-applications.php`;
 
-const DELETE_JOB_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/delete.php";
+const DELETE_JOB_API = `${API_BASE}/jobs/delete.php`;
 
-const UPDATE_STATUS_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/update-status.php";
+const UPDATE_STATUS_API = `${API_BASE}/jobs/update-status.php`;
 
 const MyJobs = () => {
   const navigate = useNavigate();
@@ -43,6 +41,7 @@ const MyJobs = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [openMenu, setOpenMenu] = useState(null);
+  const [menuPosition, setMenuPosition] = useState("top");
 
   const [jobs, setJobs] = useState([]);
 
@@ -545,6 +544,30 @@ const MyJobs = () => {
   };
 
   // =========================================================
+  // HANDLE MENU TOGGLE WITH SMART POSITION
+  // =========================================================
+
+  const handleMenuToggle = (e, jobId) => {
+    e.stopPropagation();
+
+    if (openMenu === jobId) {
+      setOpenMenu(null);
+      return;
+    }
+
+    // Check if row is near bottom of viewport
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    // If button is in lower half of viewport, open menu upward
+    const shouldOpenUpward = rect.bottom > viewportHeight * 0.6;
+
+    setMenuPosition(shouldOpenUpward ? "bottom" : "top");
+    setOpenMenu(jobId);
+  };
+
+  // =========================================================
   // STATS
   // =========================================================
 
@@ -614,253 +637,225 @@ const MyJobs = () => {
       onClick={() => setOpenMenu(null)}
     >
       {/* =====================================================
-    MODERN PAGE HEADER
-===================================================== */}
+          PAGE HEADER
+      ===================================================== */}
 
-    {/* =====================================================
-    ROUNDED MODERN PAGE HEADER
-===================================================== */}
+      <header className="relative mx-4 mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm lg:mx-6">
 
-<header className="relative mx-4 mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm lg:mx-6">
-
-  {/* Soft background circles */}
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-blue-100/60 blur-3xl" />
-    <div className="absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-indigo-100/50 blur-3xl" />
-  </div>
-
-  <div className="relative px-5 py-5 sm:px-6 lg:px-7">
-
-    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-      {/* LEFT CONTENT */}
-      <div className="flex items-start gap-4">
-
-        {/* Icon */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
-          <BriefcaseBusiness size={22} strokeWidth={2} />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-blue-100/60 blur-3xl" />
+          <div className="absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-indigo-100/50 blur-3xl" />
         </div>
 
-        <div>
+        <div className="relative px-5 py-5 sm:px-6 lg:px-7">
 
-          {/* Breadcrumb */}
-          <div className="mb-1 flex items-center gap-2 text-[11px] font-medium">
-            <span className="text-gray-400">
-              Recruiter
-            </span>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-            <span className="text-gray-300">
-              /
-            </span>
+            {/* LEFT CONTENT */}
+            <div className="flex items-start gap-4">
 
-            <span className="text-blue-600">
-              My Jobs
-            </span>
-          </div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
+                <BriefcaseBusiness size={22} strokeWidth={2} />
+              </div>
 
-          {/* Title */}
-          <div className="flex flex-wrap items-center gap-2">
+              <div>
 
-            <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-              My Jobs
-            </h1>
+                <div className="mb-1 flex items-center gap-2 text-[11px] font-medium">
+                  <span className="text-gray-400">Recruiter</span>
+                  <span className="text-gray-300">/</span>
+                  <span className="text-blue-600">My Jobs</span>
+                </div>
 
-            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600">
-              {stats.total} {stats.total === 1 ? "Job" : "Jobs"}
-            </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+                    My Jobs
+                  </h1>
 
-          </div>
+                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600">
+                    {stats.total} {stats.total === 1 ? "Job" : "Jobs"}
+                  </span>
+                </div>
 
-          <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-            Manage, monitor and track your job postings.
-          </p>
+                <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+                  Manage, monitor and track your job postings.
+                </p>
 
-          {/* Mini Stats */}
-          <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
 
-            <div className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <div className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[11px] font-semibold text-emerald-700">
+                      {stats.active} Active
+                    </span>
+                  </div>
 
-              <span className="text-[11px] font-semibold text-emerald-700">
-                {stats.active} Active
-              </span>
+                  <div className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                    <span className="text-[11px] font-semibold text-gray-600">
+                      {stats.closed} Closed
+                    </span>
+                  </div>
+
+                  <div className="hidden items-center gap-1.5 rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 sm:flex">
+                    <Users size={12} className="text-violet-500" />
+                    <span className="text-[11px] font-semibold text-violet-700">
+                      {stats.applicants} Applicants
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+            {/* RIGHT ACTIONS */}
+            <div className="flex items-center gap-2 sm:gap-3">
 
-              <span className="text-[11px] font-semibold text-gray-600">
-                {stats.closed} Closed
-              </span>
-            </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRefresh();
+                }}
+                disabled={loading || refreshing}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                title="Refresh jobs"
+              >
+                <RefreshCw
+                  size={16}
+                  className={`transition-transform ${
+                    refreshing
+                      ? "animate-spin"
+                      : "group-hover:rotate-90"
+                  }`}
+                />
+              </button>
 
-            <div className="hidden items-center gap-1.5 rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 sm:flex">
-              <Users
-                size={12}
-                className="text-violet-500"
-              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/recruiter/post-job");
+                }}
+                className="group flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-sm font-semibold text-white shadow-md shadow-blue-200 transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg sm:px-5"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
+                  <Plus
+                    size={15}
+                    className="transition-transform group-hover:rotate-90"
+                  />
+                </span>
 
-              <span className="text-[11px] font-semibold text-violet-700">
-                {stats.applicants} Applicants
-              </span>
+                <span>
+                  <span className="hidden sm:inline">Post a Job</span>
+                  <span className="sm:hidden">Post</span>
+                </span>
+
+              </button>
+
             </div>
 
           </div>
 
         </div>
-      </div>
-
-      {/* RIGHT ACTIONS */}
-      <div className="flex items-center gap-2 sm:gap-3">
-
-        {/* Refresh */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRefresh();
-          }}
-          disabled={loading || refreshing}
-          className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-          title="Refresh jobs"
-        >
-          <RefreshCw
-            size={16}
-            className={`transition-transform ${
-              refreshing
-                ? "animate-spin"
-                : "group-hover:rotate-90"
-            }`}
-          />
-        </button>
-
-        {/* Post Job */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate("/recruiter/post-job");
-          }}
-          className="group flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-sm font-semibold text-white shadow-md shadow-blue-200 transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg sm:px-5"
-        >
-
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
-            <Plus
-              size={15}
-              className="transition-transform group-hover:rotate-90"
-            />
-          </span>
-
-          <span>
-            <span className="hidden sm:inline">
-              Post a Job
-            </span>
-
-            <span className="sm:hidden">
-              Post
-            </span>
-          </span>
-
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-</header>
+      </header>
 
       {/* =====================================================
           CONTENT
       ====================================================== */}
 
       <main className="mx-auto max-w-[1600px] p-4 sm:p-5 lg:p-7">
+
         {/* ===================================================
             STATS
         ==================================================== */}
 
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* Total Jobs */}
+          {loading
+            ? ["Total Jobs", "Active Jobs", "Applicants", "Total Views"].map(
+                (label) => (
+                  <div
+                    key={label}
+                    className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-full">
+                        <div className="h-3 w-20 rounded bg-gray-200" />
+                        <div className="mt-3 h-8 w-14 rounded bg-gray-200" />
+                      </div>
+                      <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-100" />
+                    </div>
+                    <div className="mt-3 h-3 w-28 rounded bg-gray-100" />
+                  </div>
+                ),
+              )
+            : (
+                <>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400">Total Jobs</p>
+                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                          {stats.total}
+                        </h2>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <BriefcaseBusiness size={19} />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[11px] text-gray-400">All posted jobs</p>
+                  </div>
 
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-400">Total Jobs</p>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400">Active Jobs</p>
+                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                          {stats.active}
+                        </h2>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <CheckCircle2 size={19} />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[11px] text-emerald-600">
+                      Currently hiring
+                    </p>
+                  </div>
 
-                <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                  {stats.total}
-                </h2>
-              </div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400">Applicants</p>
+                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                          {stats.applicants}
+                        </h2>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                        <Users size={19} />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[11px] text-gray-400">Across all jobs</p>
+                  </div>
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <BriefcaseBusiness size={19} />
-              </div>
-            </div>
-
-            <p className="mt-3 text-[11px] text-gray-400">All posted jobs</p>
-          </div>
-
-          {/* Active Jobs */}
-
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-400">Active Jobs</p>
-
-                <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                  {stats.active}
-                </h2>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <CheckCircle2 size={19} />
-              </div>
-            </div>
-
-            <p className="mt-3 text-[11px] text-emerald-600">
-              Currently hiring
-            </p>
-          </div>
-
-          {/* Applicants */}
-
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-400">Applicants</p>
-
-                <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                  {stats.applicants}
-                </h2>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                <Users size={19} />
-              </div>
-            </div>
-
-            <p className="mt-3 text-[11px] text-gray-400">Across all jobs</p>
-          </div>
-
-          {/* Views */}
-
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-400">Total Views</p>
-
-                <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                  {stats.views.toLocaleString()}
-                </h2>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                <Eye size={19} />
-              </div>
-            </div>
-
-            <p className="mt-3 text-[11px] text-gray-400">Job profile views</p>
-          </div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400">Total Views</p>
+                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                          {stats.views.toLocaleString()}
+                        </h2>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                        <Eye size={19} />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[11px] text-gray-400">
+                      Job profile views
+                    </p>
+                  </div>
+                </>
+              )}
         </div>
 
         {/* ===================================================
@@ -868,6 +863,7 @@ const MyJobs = () => {
         ==================================================== */}
 
         <section className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+
           {/* Section Header */}
 
           <div className="border-b border-gray-100 p-5 sm:p-6">
@@ -885,7 +881,6 @@ const MyJobs = () => {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                {/* Search */}
 
                 <div className="relative">
                   <Search
@@ -903,8 +898,6 @@ const MyJobs = () => {
                   />
                 </div>
 
-                {/* Status Filter */}
-
                 <div className="relative">
                   <Filter
                     size={15}
@@ -918,9 +911,7 @@ const MyJobs = () => {
                     className="h-10 w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 pl-9 pr-9 text-sm text-gray-600 outline-none transition focus:border-blue-500 focus:bg-white sm:w-36"
                   >
                     <option value="All">All Status</option>
-
                     <option value="Active">Active</option>
-
                     <option value="Closed">Closed</option>
                   </select>
 
@@ -938,14 +929,101 @@ const MyJobs = () => {
           ================================================== */}
 
           {loading && (
-            <div className="flex flex-col items-center justify-center px-6 py-20">
-              <Loader2 size={30} className="animate-spin text-blue-500" />
+            <div className="animate-pulse">
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/70">
+                      {[
+                        "Job",
+                        "Details",
+                        "Applicants",
+                        "Views",
+                        "Deadline",
+                        "Status",
+                        "Action",
+                      ].map((heading) => (
+                        <th
+                          key={heading}
+                          className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-300"
+                        >
+                          {heading}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4, 5].map((item) => (
+                      <tr key={item} className="border-b border-gray-100">
+                        <td className="px-6 py-5">
+                          <div className="flex gap-3">
+                            <div className="h-11 w-11 shrink-0 rounded-xl bg-gray-200" />
+                            <div className="flex-1 space-y-2">
+                              <div className="h-4 w-36 rounded bg-gray-200" />
+                              <div className="h-3 w-24 rounded bg-gray-100" />
+                              <div className="h-3 w-28 rounded bg-gray-100" />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="space-y-3">
+                            <div className="h-3 w-28 rounded bg-gray-200" />
+                            <div className="h-3 w-20 rounded bg-gray-100" />
+                            <div className="h-3 w-24 rounded bg-gray-200" />
+                          </div>
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="mx-auto h-5 w-8 rounded bg-gray-200" />
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="mx-auto h-4 w-10 rounded bg-gray-200" />
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="h-3 w-24 rounded bg-gray-200" />
+                          <div className="mt-2 h-3 w-20 rounded bg-gray-100" />
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="h-7 w-16 rounded-lg bg-gray-200" />
+                        </td>
+                        <td className="px-5 py-5">
+                          <div className="ml-auto h-8 w-8 rounded-lg bg-gray-100" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-              <p className="mt-4 text-sm font-medium text-gray-600">
-                Loading your jobs...
-              </p>
+              <div className="divide-y divide-gray-100 lg:hidden">
+                {[1, 2, 3, 4].map((item) => (
+                  <div key={item} className="p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="h-11 w-11 shrink-0 rounded-xl bg-gray-200" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-40 max-w-full rounded bg-gray-200" />
+                        <div className="h-3 w-24 rounded bg-gray-100" />
+                        <div className="h-3 w-32 rounded bg-gray-100" />
+                      </div>
+                      <div className="h-8 w-8 rounded-lg bg-gray-100" />
+                    </div>
 
-              <p className="mt-1 text-xs text-gray-400">Please wait</p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {[1, 2, 3, 4].map((box) => (
+                        <div key={box} className="rounded-xl bg-gray-100 p-3">
+                          <div className="h-3 w-16 rounded bg-gray-200" />
+                          <div className="mt-2 h-3 w-20 max-w-full rounded bg-gray-200" />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      <div className="h-8 w-16 rounded-lg bg-gray-100" />
+                      <div className="h-8 w-16 rounded-lg bg-gray-100" />
+                      <div className="h-8 w-24 rounded-lg bg-gray-100" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -984,11 +1062,11 @@ const MyJobs = () => {
           {!loading && !error && (
             <>
               {/* ===========================================
-                  DESKTOP TABLE
+                  DESKTOP TABLE - WITH STICKY ACTION COLUMN
               ============================================ */}
 
               <div className="hidden overflow-x-auto lg:block">
-                <table className="w-full min-w-[1150px]">
+                <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50/70">
                       <th className="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400">
@@ -1015,7 +1093,8 @@ const MyJobs = () => {
                         Status
                       </th>
 
-                      <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                      {/* STICKY ACTION COLUMN */}
+                      <th className="sticky right-0 z-20 w-[80px] border-l border-gray-100 bg-gray-50/70 px-5 py-4 text-center text-[11px] font-bold uppercase tracking-wider text-gray-400">
                         Action
                       </th>
                     </tr>
@@ -1026,7 +1105,7 @@ const MyJobs = () => {
                       filteredJobs.map((job) => (
                         <tr
                           key={job.id}
-                          className="border-b border-gray-100 last:border-0 transition hover:bg-gray-50/60"
+                          className="group border-b border-gray-100 last:border-0 transition hover:bg-gray-50/60"
                         >
                           {/* JOB */}
 
@@ -1067,7 +1146,6 @@ const MyJobs = () => {
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 text-xs text-gray-500">
                                 <MapPin size={14} className="text-gray-400" />
-
                                 <span className="max-w-[180px] truncate">
                                   {job.location}
                                 </span>
@@ -1078,7 +1156,6 @@ const MyJobs = () => {
                                   size={14}
                                   className="text-gray-400"
                                 />
-
                                 {job.type}
                               </div>
 
@@ -1094,13 +1171,13 @@ const MyJobs = () => {
                             <button
                               type="button"
                               onClick={() => viewApplicants(job)}
-                              className="group inline-flex flex-col items-center"
+                              className="group/app inline-flex flex-col items-center"
                             >
-                              <span className="text-sm font-bold text-gray-900 group-hover:text-blue-600">
+                              <span className="text-sm font-bold text-gray-900 group-hover/app:text-blue-600">
                                 {job.applicants}
                               </span>
 
-                              <span className="mt-1 text-[10px] text-gray-400 group-hover:text-blue-500">
+                              <span className="mt-1 text-[10px] text-gray-400 group-hover/app:text-blue-500">
                                 applicants
                               </span>
                             </button>
@@ -1111,7 +1188,6 @@ const MyJobs = () => {
                           <td className="px-4 py-5 text-center">
                             <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700">
                               <Eye size={14} className="text-gray-400" />
-
                               {job.views.toLocaleString()}
                             </div>
                           </td>
@@ -1124,7 +1200,6 @@ const MyJobs = () => {
                                 size={14}
                                 className="text-gray-400"
                               />
-
                               {job.deadline}
                             </div>
 
@@ -1142,21 +1217,17 @@ const MyJobs = () => {
                             />
                           </td>
 
-                          {/* ACTION */}
-
-                          <td className="px-5 py-5 text-right">
+                          {/* STICKY ACTION COLUMN */}
+                          <td className="sticky right-0 z-10 w-[80px] border-l border-gray-100 bg-white px-5 py-5 text-center group-hover:bg-gray-50">
                             <div
                               className="relative inline-block"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setOpenMenu(
-                                    openMenu === job.id ? null : job.id,
-                                  )
-                                }
+                                onClick={(e) => handleMenuToggle(e, job.id)}
                                 className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                                title="Actions"
                               >
                                 <MoreVertical size={18} />
                               </button>
@@ -1164,6 +1235,7 @@ const MyJobs = () => {
                               {openMenu === job.id && (
                                 <JobActionMenu
                                   job={job}
+                                  position={menuPosition}
                                   onView={() => viewJob(job)}
                                   onEdit={() => editJob(job)}
                                   onApplicants={() => viewApplicants(job)}
@@ -1228,9 +1300,7 @@ const MyJobs = () => {
                         >
                           <button
                             type="button"
-                            onClick={() =>
-                              setOpenMenu(openMenu === job.id ? null : job.id)
-                            }
+                            onClick={(e) => handleMenuToggle(e, job.id)}
                             className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100"
                           >
                             <MoreVertical size={18} />
@@ -1239,6 +1309,7 @@ const MyJobs = () => {
                           {openMenu === job.id && (
                             <JobActionMenu
                               job={job}
+                              position={menuPosition}
                               onView={() => viewJob(job)}
                               onEdit={() => editJob(job)}
                               onApplicants={() => viewApplicants(job)}
@@ -1250,8 +1321,6 @@ const MyJobs = () => {
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                        {/* Location */}
-
                         <div className="rounded-xl bg-gray-50 p-3">
                           <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
                             <MapPin size={13} />
@@ -1262,8 +1331,6 @@ const MyJobs = () => {
                             {job.location}
                           </p>
                         </div>
-
-                        {/* Applicants */}
 
                         <button
                           type="button"
@@ -1280,8 +1347,6 @@ const MyJobs = () => {
                           </p>
                         </button>
 
-                        {/* Views */}
-
                         <div className="rounded-xl bg-gray-50 p-3">
                           <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
                             <Eye size={13} />
@@ -1292,8 +1357,6 @@ const MyJobs = () => {
                             {job.views.toLocaleString()}
                           </p>
                         </div>
-
-                        {/* Deadline */}
 
                         <div className="rounded-xl bg-gray-50 p-3">
                           <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
@@ -1427,27 +1490,32 @@ const JobStatus = ({ status, statusConfig }) => {
       className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold ${config.className}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
-
       {status}
     </span>
   );
 };
 
 /* =========================================================
-   ACTION MENU
+   ACTION MENU - WITH SMART POSITIONING
 ========================================================= */
 
 const JobActionMenu = ({
   job,
+  position = "top",
   onView,
   onEdit,
   onApplicants,
   onToggle,
   onDelete,
 }) => {
+  const positionClass =
+    position === "bottom"
+      ? "bottom-10 right-0"
+      : "top-10 right-0";
+
   return (
     <div
-      className="absolute right-0 top-10 z-50 w-48 overflow-hidden rounded-xl border border-gray-100 bg-white py-1.5 text-left shadow-xl"
+      className={`absolute ${positionClass} z-50 w-48 overflow-hidden rounded-xl border border-gray-100 bg-white py-1.5 text-left shadow-xl`}
       onClick={(e) => e.stopPropagation()}
     >
       {/* View */}

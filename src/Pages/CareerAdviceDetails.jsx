@@ -23,8 +23,9 @@ import Footer from "../Components/Footer";
    API
 ========================================================= */
 
-const ARTICLES_API =
-  "http://192.168.1.50/job_portal/job-portal-api/api/articles/get-all.php";
+import API_BASE from "../Config/api";
+
+const ARTICLES_API = `${API_BASE}/articles/get-all.php`;
 
 /* =========================================================
    HELPERS

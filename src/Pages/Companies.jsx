@@ -23,11 +23,9 @@ import Footer from "../Components/Footer";
 // API CONFIGURATION
 // =====================================================
 
-const API_BASE_URL =
-  "http://localhost/job_portal/job-portal-api";
+import API_BASE from "../Config/api";
 
-const COMPANIES_API =
-  `${API_BASE_URL}/api/companies/get-all.php`;
+const COMPANIES_API = `${API_BASE}/companies/get-all.php`;
 
 // =====================================================
 // HELPERS
@@ -463,28 +461,88 @@ const Companies = () => {
               LOADING
           ================================================= */}
 
-          {loading && (
-            <div className="flex min-h-[350px] flex-col items-center justify-center">
+         {/* =================================================
+    SKELETON LOADING
+================================================= */}
 
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+{loading && (
+  <div>
+    {/* Skeleton Directory Header */}
+    <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="w-full">
+        <div className="h-3 w-36 animate-pulse rounded bg-slate-200" />
 
-                <Loader2
-                  size={30}
-                  className="animate-spin text-blue-600"
-                />
+        <div className="mt-3 h-8 w-64 max-w-full animate-pulse rounded-lg bg-slate-200" />
 
+        <div className="mt-3 h-4 w-56 max-w-full animate-pulse rounded bg-slate-200" />
+      </div>
+    </div>
+
+    {/* Skeleton Company Cards */}
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex h-full min-h-[350px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
+          {/* Top Accent */}
+          <div className="h-1.5 bg-slate-200" />
+
+          <div className="flex flex-1 flex-col p-6">
+            {/* Company Logo + Name */}
+            <div className="flex items-start gap-4">
+              <div className="h-16 w-16 shrink-0 animate-pulse rounded-2xl bg-slate-200" />
+
+              <div className="min-w-0 flex-1">
+                <div className="h-5 w-4/5 animate-pulse rounded bg-slate-200" />
+
+                <div className="mt-3 h-4 w-2/5 animate-pulse rounded bg-slate-200" />
+
+                <div className="mt-3 h-6 w-24 animate-pulse rounded-lg bg-slate-100" />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="mt-5 space-y-2">
+              <div className="h-3 w-full animate-pulse rounded bg-slate-200" />
+              <div className="h-3 w-5/6 animate-pulse rounded bg-slate-200" />
+            </div>
+
+            {/* Company Details */}
+            <div className="mt-5 space-y-4 border-t border-slate-100 pt-5">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-3/5 animate-pulse rounded bg-slate-200" />
               </div>
 
-              <p className="mt-5 text-sm font-semibold text-slate-600">
-                Loading companies...
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-2/5 animate-pulse rounded bg-slate-200" />
+              </div>
 
-              <p className="mt-1 text-xs text-slate-400">
-                Fetching latest company information
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-3/5 animate-pulse rounded bg-slate-200" />
+              </div>
 
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-1/3 animate-pulse rounded bg-slate-200" />
+              </div>
             </div>
-          )}
+
+            {/* Buttons */}
+            <div className="mt-auto flex items-center gap-3 pt-6">
+              <div className="h-11 flex-1 animate-pulse rounded-xl bg-slate-200" />
+
+              <div className="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-slate-200" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
           {/* =================================================
               ERROR

@@ -25,11 +25,11 @@ import Footer from "../Components/Footer";
 // API
 // ======================================================
 
-const SETTINGS_API =
-  "http://localhost/job_portal/job-portal-api/api/admin/settings.php";
+import API_BASE from "../Config/api";
 
-const CONTACT_API =
-  "http://localhost/job_portal/job-portal-api/api/contact/create.php";
+const SETTINGS_API = `${API_BASE}/admin/settings.php`;
+
+const CONTACT_API = `${API_BASE}/contact/create.php`;
 
 // ======================================================
 // DEFAULT SETTINGS

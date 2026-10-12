@@ -13,8 +13,9 @@ import {
 import axios from "axios";
 
 // Main laptop ka IP address — localhost nahi
-const API_URL =
-  "http://192.168.1.50/job_portal/job-portal-api/api/admin/settings.php";
+import API_BASE from "../Config/api";
+
+const API_URL = `${API_BASE}/admin/settings.php`;
   
 const DEFAULT_EMAIL = "admin@jobportal.com";
 

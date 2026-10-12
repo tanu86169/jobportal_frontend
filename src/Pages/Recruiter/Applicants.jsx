@@ -22,9 +22,7 @@ import {
 // API BASE
 // =====================================================
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api/api";
-
+import API_BASE from "../../Config/api";
 // =====================================================
 // COMPONENT
 // =====================================================
@@ -531,23 +529,94 @@ const Applicants = () => {
   // LOADING
   // =====================================================
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-600">
+ 
+if (loading) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      {/* Header skeleton */}
+      <div className="mb-6 animate-pulse">
+        <div className="h-8 w-40 rounded-lg bg-gray-200" />
+        <div className="mt-3 h-4 w-72 max-w-full rounded bg-gray-100" />
+      </div>
 
-          <Loader2
-            className="w-6 h-6 animate-spin"
-          />
+      {/* Total applications + search skeleton */}
+      <div className="mb-6 animate-pulse rounded-xl border border-gray-200 bg-white p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="h-4 w-36 rounded bg-gray-200" />
+            <div className="mt-3 h-9 w-16 rounded bg-gray-200" />
+          </div>
 
-          <span>
-            Loading applicants...
-          </span>
-
+          <div className="h-12 w-full rounded-lg bg-gray-100 md:w-80" />
         </div>
       </div>
-    );
-  }
+
+      {/* Applicant cards skeleton */}
+      <div className="space-y-5">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="animate-pulse rounded-xl border border-gray-200 bg-white p-5 sm:p-6"
+          >
+            {/* Candidate information */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-4">
+                <div className="h-14 w-14 shrink-0 rounded-full bg-gray-200" />
+
+                <div className="min-w-0 flex-1">
+                  <div className="h-5 w-44 max-w-full rounded bg-gray-200" />
+
+                  <div className="mt-3 h-3 w-56 max-w-full rounded bg-gray-100" />
+
+                  <div className="mt-2 h-3 w-36 max-w-full rounded bg-gray-100" />
+                </div>
+              </div>
+
+              <div className="h-7 w-24 rounded-full bg-gray-100" />
+            </div>
+
+            {/* Job details */}
+            <div className="mt-6 grid grid-cols-1 gap-5 border-t border-gray-100 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((detail) => (
+                <div key={detail}>
+                  <div className="h-3 w-20 rounded bg-gray-100" />
+                  <div className="mt-3 h-4 w-32 max-w-full rounded bg-gray-200" />
+                </div>
+              ))}
+            </div>
+
+            {/* Skills */}
+            <div className="mt-6">
+              <div className="h-3 w-16 rounded bg-gray-100" />
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[1, 2, 3, 4].map((skill) => (
+                  <div
+                    key={skill}
+                    className="h-7 w-20 rounded-full bg-gray-100"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Footer and action buttons */}
+            <div className="mt-6 flex flex-col gap-4 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="h-4 w-36 rounded bg-gray-100" />
+
+              <div className="flex flex-wrap gap-2">
+                <div className="h-10 w-24 rounded-lg bg-gray-200" />
+                <div className="h-10 w-20 rounded-lg bg-gray-100" />
+                <div className="h-10 w-24 rounded-lg bg-gray-200" />
+                <div className="h-10 w-28 rounded-lg bg-gray-200" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
   // =====================================================
   // PAGE

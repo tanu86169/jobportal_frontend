@@ -29,11 +29,11 @@ import Footer from "../Components/Footer";
 // API
 // =========================================================
 
-const FAQ_API =
-  "http://localhost/job_portal/job-portal-api/api/help/faqs.php";
+import API_BASE from "../Config/api";
 
-const SETTINGS_API =
-  "http://localhost/job_portal/job-portal-api/api/admin/settings.php";
+const FAQ_API = `${API_BASE}/help/faqs.php`;
+
+const SETTINGS_API = `${API_BASE}/admin/settings.php`;
 
 // =========================================================
 // DEFAULT SETTINGS
@@ -998,26 +998,34 @@ const HelpsAndSupport = () => {
 
               {/* Loading */}
 
-              {loading && (
-                <div className="space-y-3">
+            
+{/* FAQ LIST SKELETON */}
+{loading && (
+  <div className="space-y-4">
+    {[1, 2, 3, 4, 5].map((item) => (
+      <div
+        key={item}
+        className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+      >
+        {/* Category Badge */}
+        <div className="h-5 w-24 rounded-full bg-slate-200" />
 
-                  {[1, 2, 3, 4].map(
-                    (item) => (
-                      <div
-                        key={item}
-                        className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
-                      >
-                        <div className="h-3 w-24 rounded bg-slate-100" />
+        {/* Question */}
+        <div className="mt-4 h-5 w-4/5 rounded-md bg-slate-200" />
 
-                        <div className="mt-4 h-5 w-3/4 rounded bg-slate-100" />
+        {/* Second line */}
+        <div className="mt-3 h-4 w-2/3 rounded-md bg-slate-100" />
 
-                        <div className="mt-3 h-3 w-1/3 rounded bg-slate-100" />
-                      </div>
-                    )
-                  )}
+        {/* Answer preview */}
+        <div className="mt-5 space-y-2">
+          <div className="h-3 w-full rounded bg-slate-100" />
+          <div className="h-3 w-5/6 rounded bg-slate-100" />
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
-                </div>
-              )}
 
               {/* Error */}
 
@@ -1248,24 +1256,39 @@ const HelpsAndSupport = () => {
 
                 {/* Dynamic Email */}
 
-                {!settingsLoading &&
-                  settings.support_email && (
-                    <a
-                      href={`mailto:${settings.support_email}`}
-                      className="mt-4 flex items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-blue-50 transition hover:bg-white/15"
-                    >
-                      <Mail
-                        size={17}
-                        className="shrink-0"
-                      />
+               
+{/* SUPPORT CARD SKELETON */}
+{settingsLoading && (
+  <div className="animate-pulse rounded-3xl border border-slate-200 bg-white p-6 sm:p-7">
+    <div className="h-12 w-12 rounded-2xl bg-slate-200" />
 
-                      <span className="min-w-0 truncate">
-                        {
-                          settings.support_email
-                        }
-                      </span>
-                    </a>
-                  )}
+    <div className="mt-6 h-3 w-32 rounded bg-slate-200" />
+
+    <div className="mt-3 h-7 w-4/5 rounded bg-slate-200" />
+
+    <div className="mt-4 space-y-2">
+      <div className="h-3 w-full rounded bg-slate-100" />
+      <div className="h-3 w-5/6 rounded bg-slate-100" />
+      <div className="h-3 w-2/3 rounded bg-slate-100" />
+    </div>
+
+    <div className="mt-6 h-12 w-full rounded-xl bg-slate-200" />
+
+    <div className="mt-4 h-11 w-full rounded-xl bg-slate-100" />
+
+    <div className="mt-3 h-11 w-full rounded-xl bg-slate-100" />
+  </div>
+)}
+
+{!settingsLoading && (
+  <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-cyan-500 p-6 text-white shadow-xl shadow-blue-600/20 sm:p-7">
+
+    {/* Yahan aapka existing Support Card content rahega */}
+
+  </div>
+)}
+
+
 
                 {/* Dynamic Phone */}
 

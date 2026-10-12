@@ -5,7 +5,7 @@ import axios from "axios";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 
-import { API_BASE, default as API_ROOT } from "../../config/api";
+import API_BASE from "../../config/api";
 
 import {
   ArrowLeft,
@@ -30,6 +30,130 @@ import {
 const JOBS_API = `${API_BASE}/jobs/get-all.php`;
 const APPLY_API = `${API_BASE}/applications/apply.php`;
 const CHECK_APPLICATION_API = `${API_BASE}/applications/check.php`;
+
+// =========================================================
+// SKELETON PRIMITIVE
+// =========================================================
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+// =========================================================
+// APPLY JOB SKELETON
+// =========================================================
+
+const ApplyJobSkeleton = () => {
+  return (
+    <>
+      <Header />
+
+      <main className="min-h-screen bg-slate-50">
+
+        {/* ===== PAGE HEADER SKELETON ===== */}
+        <section className="bg-slate-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <Skeleton className="mb-8 h-5 w-20 !bg-white/15" />
+
+            <div className="flex flex-col md:flex-row gap-6 md:items-center">
+
+              {/* Company Logo */}
+              <Skeleton className="h-20 w-20 shrink-0 rounded-2xl !bg-white/15" />
+
+              {/* Job Header */}
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-8 w-3/4 !bg-white/20 md:h-10 md:w-2/3" />
+                <div className="flex flex-wrap gap-3">
+                  <Skeleton className="h-5 w-32 !bg-white/15" />
+                  <Skeleton className="h-5 w-4 !bg-white/15" />
+                  <Skeleton className="h-5 w-28 !bg-white/15" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ===== MAIN CONTENT SKELETON ===== */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+
+            {/* ===== APPLICATION FORM SKELETON ===== */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
+
+                {/* Form Header */}
+                <div className="mb-8 space-y-2">
+                  <Skeleton className="h-7 w-64 md:h-8 md:w-72" />
+                  <Skeleton className="h-4 w-full max-w-md" />
+                </div>
+
+                {/* Resume field */}
+                <div className="mb-7">
+                  <Skeleton className="mb-2 h-4 w-20" />
+
+                  <div className="rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center">
+                    <Skeleton className="mb-3 h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="mt-2 h-3 w-52" />
+                  </div>
+                </div>
+
+                {/* Cover letter field */}
+                <div className="mb-7">
+                  <Skeleton className="mb-2 h-4 w-28" />
+                  <Skeleton className="h-40 w-full rounded-xl" />
+                  <Skeleton className="mt-2 h-3 w-64" />
+                </div>
+
+                {/* Submit button */}
+                <Skeleton className="h-12 w-full rounded-xl" />
+
+              </div>
+            </div>
+
+            {/* ===== SIDEBAR SKELETON ===== */}
+            <div className="space-y-6">
+
+              {/* Job Details card */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <Skeleton className="mb-5 h-6 w-32" />
+
+                <div className="space-y-5">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="flex gap-3">
+                      <Skeleton className="h-5 w-5 shrink-0 rounded" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Candidate info card */}
+              <div className="bg-cyan-50 rounded-2xl border border-cyan-100 p-6">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="mt-3 h-5 w-40" />
+                <Skeleton className="mt-1 h-4 w-48" />
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <Footer />
+    </>
+  );
+};
 
 // =========================================================
 // Get logged-in user
@@ -686,28 +810,11 @@ const ApplyJob = () => {
   };
 
   // =========================================================
-  // Loading
+  // Loading (SKELETON)
   // =========================================================
 
   if (loading) {
-    return (
-      <>
-        <Header />
-
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-slate-600">
-            <Loader2
-              className="animate-spin"
-              size={24}
-            />
-
-            <span>Loading job...</span>
-          </div>
-        </div>
-
-        <Footer />
-      </>
-    );
+    return <ApplyJobSkeleton />;
   }
 
   // =========================================================

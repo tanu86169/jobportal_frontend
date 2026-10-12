@@ -23,19 +23,185 @@ import {
 // API
 // ======================================================
 
-const API_BASE =
-  "http://localhost/job_portal/job-portal-api/api/messages";
+import API_BASE from "../../config/api";
+
+const MESSAGES_BASE = `${API_BASE}/messages`;
 
 const CONVERSATIONS_API =
-  `${API_BASE}/get-conversations.php`;
+  `${MESSAGES_BASE}/get-conversations.php`;
 
 const MESSAGES_API =
-  `${API_BASE}/get-messages.php`;
+  `${MESSAGES_BASE}/get-messages.php`;
 
 const SEND_MESSAGE_API =
-  `${API_BASE}/send-message.php`;
+  `${MESSAGES_BASE}/send-message.php`;
 
 const POLLING_TIME = 5000;
+
+// ======================================================
+// SKELETON PRIMITIVE
+// ======================================================
+
+const Skeleton = ({ className = "", style }) => (
+  <div
+    style={style}
+    className={`animate-pulse rounded-md bg-slate-200/80 ${className}`}
+  />
+);
+
+// ======================================================
+// MESSAGES SKELETON
+// ======================================================
+
+const MessagesSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-5 lg:p-6">
+      <div className="mx-auto max-w-7xl">
+
+        {/* ===== PAGE HEADER SKELETON ===== */}
+        <div className="mb-5 flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 shrink-0 rounded-2xl" />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-7 w-32 sm:h-8 sm:w-40" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </div>
+          <Skeleton className="h-11 w-28 rounded-xl" />
+        </div>
+
+        {/* ===== CHAT CONTAINER SKELETON ===== */}
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
+          <div className="grid h-[calc(100vh-190px)] min-h-[560px] grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
+
+            {/* ===== SIDEBAR SKELETON ===== */}
+            <aside className="flex min-w-0 flex-col border-r border-slate-200 bg-white">
+
+              {/* Sidebar header */}
+              <div className="border-b border-slate-100 p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-6 w-10 rounded-full" />
+                </div>
+                <Skeleton className="h-11 w-full rounded-xl" />
+              </div>
+
+              {/* Conversation list */}
+              <div className="min-h-0 flex-1 overflow-hidden">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="border-b border-slate-100 px-4 py-4"
+                  >
+                    <div className="flex gap-3">
+                      <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-3 w-12" />
+                        </div>
+                        <Skeleton className="h-3 w-16" />
+                        <div className="flex items-center justify-between gap-2">
+                          <Skeleton className="h-3 flex-1" />
+                          <Skeleton className="h-5 w-5 shrink-0 rounded-full" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </aside>
+
+            {/* ===== CHAT WINDOW SKELETON ===== */}
+            <section className="hidden min-w-0 flex-col bg-white md:flex">
+
+              {/* Chat header */}
+              <div className="flex min-h-[76px] items-center justify-between border-b border-slate-200 px-4 sm:px-6">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Skeleton className="h-4 w-32 sm:h-5 sm:w-40" />
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </div>
+                    <Skeleton className="h-3 w-44" />
+                  </div>
+                </div>
+                <Skeleton className="h-9 w-9 shrink-0 rounded-xl" />
+              </div>
+
+              {/* Messages area */}
+              <div className="min-h-0 flex-1 overflow-hidden bg-slate-50/80 px-3 py-5 sm:px-6">
+                <div className="mx-auto max-w-4xl space-y-4">
+
+                  {/* Incoming message */}
+                  <div className="flex justify-start">
+                    <div className="max-w-[88%] space-y-2 sm:max-w-[70%]">
+                      <Skeleton className="h-16 w-64 rounded-2xl rounded-bl-md" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+
+                  {/* Outgoing message */}
+                  <div className="flex justify-end">
+                    <div className="max-w-[88%] space-y-2 sm:max-w-[70%]">
+                      <Skeleton className="ml-auto h-12 w-56 rounded-2xl rounded-br-md" />
+                      <Skeleton className="ml-auto h-3 w-16" />
+                    </div>
+                  </div>
+
+                  {/* Incoming message */}
+                  <div className="flex justify-start">
+                    <div className="max-w-[88%] space-y-2 sm:max-w-[70%]">
+                      <Skeleton className="h-12 w-48 rounded-2xl rounded-bl-md" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+
+                  {/* Outgoing message */}
+                  <div className="flex justify-end">
+                    <div className="max-w-[88%] space-y-2 sm:max-w-[70%]">
+                      <Skeleton className="ml-auto h-20 w-72 rounded-2xl rounded-br-md" />
+                      <Skeleton className="ml-auto h-3 w-16" />
+                    </div>
+                  </div>
+
+                  {/* Incoming message */}
+                  <div className="flex justify-start">
+                    <div className="max-w-[88%] space-y-2 sm:max-w-[70%]">
+                      <Skeleton className="h-10 w-40 rounded-2xl rounded-bl-md" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Message input */}
+              <div className="border-t border-slate-200 bg-white p-3 sm:p-4">
+                <div className="mx-auto max-w-4xl">
+                  <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
+                    <Skeleton className="h-11 flex-1 rounded-xl" />
+                    <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
+                  </div>
+                  <Skeleton className="mt-2 h-3 w-64" />
+                </div>
+              </div>
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ======================================================
 // COMPONENT
@@ -1306,28 +1472,11 @@ const Messages = () => {
     );
 
   // ====================================================
-  // LOADING SCREEN
+  // LOADING (SKELETON)
   // ====================================================
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <RefreshCw
-            size={30}
-            className="mx-auto animate-spin text-blue-600"
-          />
-
-          <h2 className="mt-4 font-bold text-slate-900">
-            Loading Messages
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Loading recruiter conversations...
-          </p>
-        </div>
-      </div>
-    );
+    return <MessagesSkeleton />;
   }
 
   // ====================================================
@@ -2009,7 +2158,6 @@ const Messages = () => {
                       size={36}
                       className="text-blue-500"
                     />
-
                   </div>
 
                   <h2 className="mt-5 text-xl font-bold text-slate-800">

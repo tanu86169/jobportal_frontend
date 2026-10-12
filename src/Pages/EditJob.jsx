@@ -24,20 +24,17 @@ import { useNavigate, useParams } from "react-router-dom";
 // API URLs
 // =========================================================
 
-const GET_MY_JOBS_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/get-my-jobs.php";
+import API_BASE from "../Config/api";
 
-const UPDATE_JOB_API =
-  "http://localhost/job_portal/job-portal-api/api/jobs/update.php";
+const GET_MY_JOBS_API = `${API_BASE}/jobs/get-my-jobs.php`;
 
-const JOB_TYPES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/job-types.php";
+const UPDATE_JOB_API = `${API_BASE}/jobs/update.php`;
 
-const WORKPLACE_TYPES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/workplace-types.php";
+const JOB_TYPES_API = `${API_BASE}/options/job-types.php`;
 
-const CATEGORIES_API =
-  "http://localhost/job_portal/job-portal-api/api/options/categories.php";
+const WORKPLACE_TYPES_API = `${API_BASE}/options/workplace-types.php`;
+
+const CATEGORIES_API = `${API_BASE}/options/categories.php`;
 
 // =========================================================
 // INITIAL FORM
@@ -87,10 +84,10 @@ const getLogoUrl = (logo) => {
   }
 
   if (value.startsWith("uploads/")) {
-    return `http://localhost/job_portal/job-portal-api/${value}`;
+    return `import.meta.env.VITE_API_URL/${value}`;
   }
 
-  return `http://localhost/job_portal/job-portal-api/uploads/${value}`;
+  return `import.meta.env.VITE_API_URL/uploads/${value}`;
 };
 
 // =========================================================
