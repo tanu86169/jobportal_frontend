@@ -28,8 +28,7 @@ import API_BASE from "../Config/api";
 
 const GET_MY_JOBS_API = `${API_BASE}/jobs/get-my-jobs.php`;
 
-const GET_RECRUITER_APPLICATIONS_API =
-  `${API_BASE}/applications/get-recruiter-applications.php`;
+const GET_RECRUITER_APPLICATIONS_API = `${API_BASE}/applications/get-recruiter-applications.php`;
 
 const DELETE_JOB_API = `${API_BASE}/jobs/delete.php`;
 
@@ -164,6 +163,90 @@ const MyJobs = () => {
 
     return [];
   };
+
+
+  const formatSalary = (job) => {
+  if (!job) return "Salary not specified";
+
+  // Agar salary pehle se formatted hai
+  if (job.salary && String(job.salary).trim()) {
+    return String(job.salary).trim();
+  }
+
+  const min = Number(job.salary_min ?? job.min_salary);
+  const max = Number(job.salary_max ?? job.max_salary);
+
+  const hasMin =
+    job.salary_min != null || job.min_salary != null;
+
+  const hasMax =
+    job.salary_max != null || job.max_salary != null;
+
+  if (
+    (!hasMin || !Number.isFinite(min)) &&
+    (!hasMax || !Number.isFinite(max))
+  ) {
+    return "Salary not specified";
+  }
+
+  const type = String(
+    job.salary_type ?? job.salary_period ?? "yearly"
+  ).toLowerCase().trim();
+
+  const isLPA = ["lpa", "lakh", "lakhs"].includes(type);
+
+  const isYearly = [
+    "yearly",
+    "annual",
+    "annually",
+    "year",
+    "per year",
+    "per annum",
+    "annum",
+    "pa",
+  ].includes(type);
+
+  const format = (value) =>
+    Number(value.toFixed(2)).toString();
+
+  if (isYearly) {
+    const minLPA = hasMin ? min / 100000 : null;
+    const maxLPA = hasMax ? max / 100000 : null;
+
+    const salary =
+      hasMin && hasMax
+        ? minLPA === maxLPA
+          ? format(minLPA)
+          : `${format(minLPA)} - ${format(maxLPA)}`
+        : format(hasMin ? minLPA : maxLPA);
+
+    return `₹${salary} LPA`;
+  }
+
+  const minValue = hasMin ? min : null;
+  const maxValue = hasMax ? max : null;
+
+  const salary =
+    hasMin && hasMax
+      ? min === max
+        ? min.toLocaleString("en-IN")
+        : `${min.toLocaleString("en-IN")} - ${max.toLocaleString("en-IN")}`
+      : (hasMin ? minValue : maxValue).toLocaleString("en-IN");
+
+  if (isLPA) return `₹${salary} LPA`;
+
+  const currency = job.currency === "USD" ? "$" : "₹";
+
+  const periodMap = {
+    monthly: " / month",
+    month: " / month",
+    daily: " / day",
+    hourly: " / hour",
+    weekly: " / week",
+  };
+
+  return `${currency}${salary}${periodMap[type] || ""}`;
+};
 
   // =========================================================
   // FETCH MY JOBS + APPLICATIONS
@@ -303,7 +386,7 @@ const MyJobs = () => {
 
           experience: job.experience || "Fresher",
 
-          salary: job.salary || "Salary not specified",
+        salary: formatSalary(job),
 
           // REAL APPLICANT COUNT
           applicants: applicantCountByJob[jobId] || 0,
@@ -352,69 +435,69 @@ const MyJobs = () => {
     fetchMyJobs(true);
   };
 
-  // =========================================================
-  // DELETE JOB
-  // =========================================================
+  
 
-  const deleteJob = async (job) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${job.title}"?`,
-    );
+// =========================================================
+// DELETE JOB
+// =========================================================
 
-    if (!confirmDelete) {
+const deleteJob = async (job) => {
+  const confirmDelete = window.confirm(
+    `Are you sure you want to delete "${job.title}"?`
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    const user = getUser();
+    const token = localStorage.getItem("token");
+
+    if (!user || !user.id || !token) {
+      alert("Please login again.");
+      navigate("/login");
       return;
     }
 
-    try {
-      const user = getUser();
-
-      if (!user || !user.id) {
-        alert("Please login as recruiter.");
-        navigate("/login");
-        return;
-      }
-
-      if (
-        String(user.role || "")
-          .toLowerCase()
-          .trim() !== "recruiter"
-      ) {
-        alert("Only recruiter can delete jobs.");
-        return;
-      }
-
-      setOpenMenu(null);
-
-      const response = await fetch(DELETE_JOB_API, {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          job_id: Number(job.id),
-          recruiter_id: Number(user.id),
-        }),
-      });
-
-      const data = await response.json();
-
-      console.log("Delete Job Response:", data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to delete job");
-      }
-
-      setJobs((prevJobs) => prevJobs.filter((item) => item.id !== job.id));
-
-      alert("Job deleted successfully.");
-    } catch (error) {
-      console.error("Delete Job Error:", error);
-
-      alert(error.message || "Something went wrong while deleting the job.");
+    if (String(user.role || "").toLowerCase().trim() !== "recruiter") {
+      alert("Only recruiters can delete jobs.");
+      return;
     }
-  };
+
+    setOpenMenu(null);
+
+    const response = await fetch(DELETE_JOB_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        job_id: Number(job.id),
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log("Delete Job Response:", data);
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Failed to delete job.");
+    }
+
+    setJobs((prevJobs) =>
+      prevJobs.filter(
+        (item) => Number(item.id) !== Number(job.id)
+      )
+    );
+
+    alert("Job deleted successfully.");
+  } catch (error) {
+    console.error("Delete Job Error:", error);
+    alert(error.message || "Something went wrong while deleting the job.");
+  }
+};
+
+
 
   // =========================================================
   // VIEW JOB
@@ -469,42 +552,46 @@ const MyJobs = () => {
       setOpenMenu(null);
 
       const user = getUser();
+      const token = localStorage.getItem("token");
 
-      if (!user || !user.id) {
-        alert("Please login as recruiter.");
+      // Authentication check
+      if (!user || !user.id || !token) {
+        alert("Your session is missing or expired. Please login again.");
         navigate("/login");
         return;
       }
 
-      if (
-        String(user.role || "")
-          .toLowerCase()
-          .trim() !== "recruiter"
-      ) {
-        alert("Only recruiter can change job status.");
+      // Only recruiters can change job status
+      if (String(user.role || "").toLowerCase().trim() !== "recruiter") {
+        alert("Only recruiters can change job status.");
         return;
       }
 
-      const newStatus = job.status === "Active" ? "closed" : "active";
+      if (!job?.id) {
+        alert("Job ID not found.");
+        return;
+      }
+
+      const newStatus =
+        String(job.status || "").toLowerCase() === "active"
+          ? "closed"
+          : "active";
 
       const confirmMessage =
         newStatus === "closed"
           ? `Are you sure you want to close "${job.title}"?`
           : `Do you want to activate "${job.title}" again?`;
 
-      const confirmed = window.confirm(confirmMessage);
-
-      if (!confirmed) {
+      if (!window.confirm(confirmMessage)) {
         return;
       }
 
       const response = await fetch(UPDATE_STATUS_API, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-
         body: JSON.stringify({
           job_id: Number(job.id),
           recruiter_id: Number(user.id),
@@ -512,33 +599,51 @@ const MyJobs = () => {
         }),
       });
 
-      const data = await response.json();
+      // Safely handle responses that may not contain valid JSON
+      const responseText = await response.text();
+      let data = {};
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(
+          `Server returned an invalid response (HTTP ${response.status}). Check update-status.php.`
+        );
+      }
 
       console.log("Update Status Response:", data);
 
+      if (response.status === 401) {
+        throw new Error(
+          data.message ||
+            "Authentication failed. Please login again and try once more."
+        );
+      }
+
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to update job status");
+        throw new Error(
+          data.message || `Failed to update job status (HTTP ${response.status}).`
+        );
       }
 
       setJobs((prevJobs) =>
         prevJobs.map((item) =>
-          item.id === job.id
+          Number(item.id) === Number(job.id)
             ? {
                 ...item,
                 status: newStatus === "active" ? "Active" : "Closed",
               }
-            : item,
-        ),
+            : item
+        )
       );
 
       alert(
         newStatus === "active"
           ? "Job activated successfully."
-          : "Job closed successfully.",
+          : "Job closed successfully."
       );
     } catch (error) {
       console.error("Update Status Error:", error);
-
       alert(error.message || "Something went wrong while updating the job.");
     }
   };
@@ -641,25 +746,20 @@ const MyJobs = () => {
       ===================================================== */}
 
       <header className="relative mx-4 mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm lg:mx-6">
-
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-blue-100/60 blur-3xl" />
           <div className="absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-indigo-100/50 blur-3xl" />
         </div>
 
         <div className="relative px-5 py-5 sm:px-6 lg:px-7">
-
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
             {/* LEFT CONTENT */}
             <div className="flex items-start gap-4">
-
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
                 <BriefcaseBusiness size={22} strokeWidth={2} />
               </div>
 
               <div>
-
                 <div className="mb-1 flex items-center gap-2 text-[11px] font-medium">
                   <span className="text-gray-400">Recruiter</span>
                   <span className="text-gray-300">/</span>
@@ -681,7 +781,6 @@ const MyJobs = () => {
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
-
                   <div className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     <span className="text-[11px] font-semibold text-emerald-700">
@@ -702,15 +801,12 @@ const MyJobs = () => {
                       {stats.applicants} Applicants
                     </span>
                   </div>
-
                 </div>
-
               </div>
             </div>
 
             {/* RIGHT ACTIONS */}
             <div className="flex items-center gap-2 sm:gap-3">
-
               <button
                 type="button"
                 onClick={(e) => {
@@ -724,9 +820,7 @@ const MyJobs = () => {
                 <RefreshCw
                   size={16}
                   className={`transition-transform ${
-                    refreshing
-                      ? "animate-spin"
-                      : "group-hover:rotate-90"
+                    refreshing ? "animate-spin" : "group-hover:rotate-90"
                   }`}
                 />
               </button>
@@ -750,13 +844,9 @@ const MyJobs = () => {
                   <span className="hidden sm:inline">Post a Job</span>
                   <span className="sm:hidden">Post</span>
                 </span>
-
               </button>
-
             </div>
-
           </div>
-
         </div>
       </header>
 
@@ -765,97 +855,108 @@ const MyJobs = () => {
       ====================================================== */}
 
       <main className="mx-auto max-w-[1600px] p-4 sm:p-5 lg:p-7">
-
         {/* ===================================================
             STATS
         ==================================================== */}
 
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {loading
-            ? ["Total Jobs", "Active Jobs", "Applicants", "Total Views"].map(
-                (label) => (
-                  <div
-                    key={label}
-                    className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="w-full">
-                        <div className="h-3 w-20 rounded bg-gray-200" />
-                        <div className="mt-3 h-8 w-14 rounded bg-gray-200" />
-                      </div>
-                      <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-100" />
+          {loading ? (
+            ["Total Jobs", "Active Jobs", "Applicants", "Total Views"].map(
+              (label) => (
+                <div
+                  key={label}
+                  className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="w-full">
+                      <div className="h-3 w-20 rounded bg-gray-200" />
+                      <div className="mt-3 h-8 w-14 rounded bg-gray-200" />
                     </div>
-                    <div className="mt-3 h-3 w-28 rounded bg-gray-100" />
+                    <div className="h-10 w-10 shrink-0 rounded-xl bg-gray-100" />
                   </div>
-                ),
-              )
-            : (
-                <>
-                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-400">Total Jobs</p>
-                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                          {stats.total}
-                        </h2>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <BriefcaseBusiness size={19} />
-                      </div>
-                    </div>
-                    <p className="mt-3 text-[11px] text-gray-400">All posted jobs</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-400">Active Jobs</p>
-                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                          {stats.active}
-                        </h2>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                        <CheckCircle2 size={19} />
-                      </div>
-                    </div>
-                    <p className="mt-3 text-[11px] text-emerald-600">
-                      Currently hiring
+                  <div className="mt-3 h-3 w-28 rounded bg-gray-100" />
+                </div>
+              ),
+            )
+          ) : (
+            <>
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">
+                      Total Jobs
                     </p>
+                    <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                      {stats.total}
+                    </h2>
                   </div>
-
-                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-400">Applicants</p>
-                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                          {stats.applicants}
-                        </h2>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                        <Users size={19} />
-                      </div>
-                    </div>
-                    <p className="mt-3 text-[11px] text-gray-400">Across all jobs</p>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <BriefcaseBusiness size={19} />
                   </div>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-400">
+                  All posted jobs
+                </p>
+              </div>
 
-                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-400">Total Views</p>
-                        <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                          {stats.views.toLocaleString()}
-                        </h2>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                        <Eye size={19} />
-                      </div>
-                    </div>
-                    <p className="mt-3 text-[11px] text-gray-400">
-                      Job profile views
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">
+                      Active Jobs
                     </p>
+                    <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                      {stats.active}
+                    </h2>
                   </div>
-                </>
-              )}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 size={19} />
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-emerald-600">
+                  Currently hiring
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">
+                      Applicants
+                    </p>
+                    <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                      {stats.applicants}
+                    </h2>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                    <Users size={19} />
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-400">
+                  Across all jobs
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">
+                      Total Views
+                    </p>
+                    <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                      {stats.views.toLocaleString()}
+                    </h2>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                    <Eye size={19} />
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-400">
+                  Job profile views
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* ===================================================
@@ -863,7 +964,6 @@ const MyJobs = () => {
         ==================================================== */}
 
         <section className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-
           {/* Section Header */}
 
           <div className="border-b border-gray-100 p-5 sm:p-6">
@@ -881,7 +981,6 @@ const MyJobs = () => {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-
                 <div className="relative">
                   <Search
                     size={17}
@@ -1509,9 +1608,7 @@ const JobActionMenu = ({
   onDelete,
 }) => {
   const positionClass =
-    position === "bottom"
-      ? "bottom-10 right-0"
-      : "top-10 right-0";
+    position === "bottom" ? "bottom-10 right-0" : "top-10 right-0";
 
   return (
     <div

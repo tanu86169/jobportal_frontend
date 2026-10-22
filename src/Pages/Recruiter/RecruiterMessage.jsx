@@ -864,7 +864,7 @@ const RecruiterMessage = () => {
                 </h2>
 
                 <p className="text-xs text-gray-500">
-                  Candidate conversations
+                  Job seeker conversations
                 </p>
               </div>
             </div>
@@ -891,7 +891,7 @@ const RecruiterMessage = () => {
                     event.target.value
                   )
                 }
-                placeholder="Search candidates..."
+                placeholder="Search job seekers..."
                 className="
                   w-full
                   h-10
@@ -959,7 +959,7 @@ const RecruiterMessage = () => {
                 </h3>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  Candidate conversations will appear here.
+                  Job seeker conversations will appear here.
                 </p>
               </div>
             ) : (
@@ -1139,11 +1139,11 @@ const RecruiterMessage = () => {
                 </div>
 
                 <h2 className="mt-5 text-xl font-bold text-gray-900">
-                  Select a Candidate
+                  Select a job seeker
                 </h2>
 
                 <p className="mt-2 text-sm text-gray-500">
-                  Select a candidate to start or continue a conversation.
+                  Select a job seeker to start or continue a conversation.
                 </p>
               </div>
             </div>

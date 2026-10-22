@@ -591,10 +591,13 @@ const Header = () => {
                     <p className="max-w-[130px] truncate text-sm font-semibold text-gray-800">
                       {user?.name || "User"}
                     </p>
-
-                    <p className="text-xs capitalize text-gray-500">
-                      {user?.role || "User"}
-                    </p>
+<p className="text-xs text-gray-500">
+  {user?.role === "candidate"
+    ? "Job Seeker"
+    : user?.role === "recruiter"
+      ? "Recruiter"
+      : user?.role || "User"}
+</p>
                   </div>
 
                   <ChevronDown

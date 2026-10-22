@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -16,13 +17,59 @@ import {
   CheckCircle,
   XCircle,
   MessageCircle,
+  Users,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 
+import API_BASE from "../../Config/api";
+
 // =====================================================
-// API BASE
+// STATUS CONFIG
 // =====================================================
 
-import API_BASE from "../../Config/api";
+const STATUS_STYLES = {
+  Shortlisted: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  Rejected: {
+    bg: "bg-red-50",
+    text: "text-red-700",
+    border: "border-red-200",
+    dot: "bg-red-500",
+  },
+  Hired: {
+    bg: "bg-purple-50",
+    text: "text-purple-700",
+    border: "border-purple-200",
+    dot: "bg-purple-500",
+  },
+  Interview: {
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
+  },
+  Screening: {
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    border: "border-orange-200",
+    dot: "bg-orange-500",
+  },
+  Applied: {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+    dot: "bg-blue-500",
+  },
+};
+
+const getStatusStyle = (status) =>
+  STATUS_STYLES[status] || STATUS_STYLES.Applied;
+
 // =====================================================
 // COMPONENT
 // =====================================================
@@ -30,18 +77,10 @@ import API_BASE from "../../Config/api";
 const Applicants = () => {
   const navigate = useNavigate();
 
-  // =====================================================
-  // STATES
-  // =====================================================
-
   const [applications, setApplications] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-
   const [search, setSearch] = useState("");
-
   const [updatingId, setUpdatingId] = useState(null);
 
   // =====================================================
@@ -50,67 +89,21 @@ const Applicants = () => {
 
   const getRecruiterId = () => {
     try {
-      const storedUser =
-        localStorage.getItem("user");
+      const storedUser = localStorage.getItem("user");
 
-      if (!storedUser) {
-        return null;
-      }
+      if (!storedUser) return null;
 
       const user = JSON.parse(storedUser);
-
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "Logged in recruiter:",
-        user
-      );
-
-      console.log(
-        "User ID:",
-        user?.id
-      );
-
-      console.log(
-        "User userId:",
-        user?.userId
-      );
-
-      console.log(
-        "User user_id:",
-        user?.user_id
-      );
-
-      console.log(
-        "Local recruiterId:",
-        localStorage.getItem(
-          "recruiterId"
-        )
-      );
-
-      console.log(
-        "===================================="
-      );
 
       const recruiterId =
         user?.id ||
         user?.userId ||
         user?.user_id ||
-        localStorage.getItem(
-          "recruiterId"
-        );
+        localStorage.getItem("recruiterId");
 
-      return recruiterId
-        ? Number(recruiterId)
-        : null;
+      return recruiterId ? Number(recruiterId) : null;
     } catch (error) {
-      console.error(
-        "User parse error:",
-        error
-      );
-
+      console.error("User parse error:", error);
       return null;
     }
   };
@@ -122,69 +115,39 @@ const Applicants = () => {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-
       setError("");
 
-      const recruiterId =
-        getRecruiterId();
+      const recruiterId = getRecruiterId();
 
-      console.log(
-        "Fetching applications for recruiter:",
-        recruiterId
-      );
-
-      // -----------------------------------------------
-      // Recruiter ID check
-      // -----------------------------------------------
-
-      if (!recruiterId) {
-        setError(
-          "Recruiter ID not found. Please login again."
-        );
-
+      if (!recruiterId || !Number.isFinite(recruiterId)) {
+        setError("Recruiter information not found. Please login again.");
+        setApplications([]);
         return;
       }
 
-      // -----------------------------------------------
-      // API
-      // -----------------------------------------------
-
-      const response =
-        await axios.get(
-          `${API_BASE}/applications/get-recruiter-applications.php`,
-          {
-            params: {
-              recruiterId:
-                recruiterId,
-            },
-          }
-        );
-
-      console.log(
-        "Applications API Response:",
-        response.data
+      const response = await axios.get(
+        `${API_BASE}/applications/get-recruiter-applications.php`,
+        {
+          params: {
+            recruiterId,
+          },
+        }
       );
 
       if (response.data?.success) {
-        const list =
-          Array.isArray(
-            response.data.applications
-          )
-            ? response.data.applications
-            : [];
+        const list = Array.isArray(response.data.applications)
+          ? response.data.applications
+          : [];
 
         setApplications(list);
       } else {
+        setApplications([]);
         setError(
-          response.data?.message ||
-            "Failed to fetch applications."
+          response.data?.message || "Failed to fetch applications."
         );
       }
     } catch (err) {
-      console.error(
-        "Applications Error:",
-        err
-      );
+      console.error("Applications Error:", err);
 
       setError(
         err.response?.data?.message ||
@@ -196,10 +159,6 @@ const Applicants = () => {
     }
   };
 
-  // =====================================================
-  // LOAD APPLICATIONS
-  // =====================================================
-
   useEffect(() => {
     fetchApplications();
   }, []);
@@ -208,1030 +167,589 @@ const Applicants = () => {
   // SEARCH
   // =====================================================
 
-  const filteredApplications =
-    applications.filter(
-      (application) => {
-        const searchText =
-          search
-            .toLowerCase()
-            .trim();
+  const filteredApplications = applications.filter((application) => {
+    const searchText = search.toLowerCase().trim();
 
-        if (!searchText) {
-          return true;
-        }
+    if (!searchText) return true;
 
-        const candidateName =
-          String(
-            application.candidate_name ||
-              ""
-          ).toLowerCase();
+    const candidateName = String(
+      application.candidate_name || ""
+    ).toLowerCase();
 
-        const candidateEmail =
-          String(
-            application.candidate_email ||
-              ""
-          ).toLowerCase();
+    const candidateEmail = String(
+      application.candidate_email || ""
+    ).toLowerCase();
 
-        const jobTitle =
-          String(
-            application.job_title ||
-              ""
-          ).toLowerCase();
+    const jobTitle = String(
+      application.job_title || ""
+    ).toLowerCase();
 
-        const companyName =
-          String(
-            application.company_name ||
-              ""
-          ).toLowerCase();
+    const companyName = String(
+      application.company_name || ""
+    ).toLowerCase();
 
-        return (
-          candidateName.includes(
-            searchText
-          ) ||
-          candidateEmail.includes(
-            searchText
-          ) ||
-          jobTitle.includes(
-            searchText
-          ) ||
-          companyName.includes(
-            searchText
-          )
-        );
-      }
+    return (
+      candidateName.includes(searchText) ||
+      candidateEmail.includes(searchText) ||
+      jobTitle.includes(searchText) ||
+      companyName.includes(searchText)
     );
+  });
+
+  // =====================================================
+  // STATS
+  // =====================================================
+
+  const stats = {
+    total: applications.length,
+    shortlisted: applications.filter(
+      (application) => application.status === "Shortlisted"
+    ).length,
+    pending: applications.filter(
+      (application) =>
+        !application.status || application.status === "Applied"
+    ).length,
+  };
 
   // =====================================================
   // UPDATE APPLICATION STATUS
   // =====================================================
 
-  const updateApplicationStatus =
-    async (
-      applicationId,
-      status
-    ) => {
+  const updateApplicationStatus = async (applicationId, status) => {
+    try {
+      setUpdatingId(applicationId);
+
+      const response = await fetch(
+        `${API_BASE}/applications/update-status.php`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            application_id: Number(applicationId),
+            status,
+          }),
+        }
+      );
+
+      const rawResponse = await response.text();
+
+      let data;
+
       try {
-        setUpdatingId(
-          applicationId
-        );
-
-        const response =
-          await fetch(
-            `${API_BASE}/applications/update-status.php`,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify({
-                application_id:
-                  Number(
-                    applicationId
-                  ),
-
-                status:
-                  status,
-              }),
-            }
-          );
-
-        const rawResponse =
-          await response.text();
-
-        console.log(
-          "Status Update RAW Response:",
-          rawResponse
-        );
-
-        let data;
-
-        try {
-          data =
-            JSON.parse(
-              rawResponse
-            );
-        } catch (parseError) {
-          console.error(
-            "Status JSON Parse Error:",
-            parseError
-          );
-
-          alert(
-            "Server returned an invalid response. Please check PHP."
-          );
-
-          return;
-        }
-
-        console.log(
-          "Status Update Response:",
-          data
-        );
-
-        if (!data?.success) {
-          alert(
-            data?.message ||
-              "Failed to update application status."
-          );
-
-          return;
-        }
-
-        // ---------------------------------------------
-        // Update UI immediately
-        // ---------------------------------------------
-
-        setApplications(
-          (previousApplications) =>
-            previousApplications.map(
-              (application) =>
-                Number(
-                  application.application_id
-                ) ===
-                Number(
-                  applicationId
-                )
-                  ? {
-                      ...application,
-                      status:
-                        status,
-                    }
-                  : application
-            )
-        );
-
-        alert(
-          `Application ${status} successfully!`
-        );
-      } catch (error) {
-        console.error(
-          "Status Update Error:",
-          error
-        );
-
-        alert(
-          "Something went wrong while updating status."
-        );
-      } finally {
-        setUpdatingId(null);
+        data = JSON.parse(rawResponse);
+      } catch (parseError) {
+        console.error("Status JSON Parse Error:", parseError);
+        alert("Server returned an invalid response. Please check PHP.");
+        return;
       }
-    };
+
+      if (!response.ok || !data?.success) {
+        alert(data?.message || "Failed to update application status.");
+        return;
+      }
+
+      setApplications((previousApplications) =>
+        previousApplications.map((application) =>
+          Number(application.application_id) === Number(applicationId)
+            ? { ...application, status }
+            : application
+        )
+      );
+
+      alert(`Application ${status} successfully!`);
+    } catch (error) {
+      console.error("Status Update Error:", error);
+      alert("Something went wrong while updating status.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   // =====================================================
   // MESSAGE CANDIDATE
   // =====================================================
 
-  const messageCandidate = (
-    application
-  ) => {
-    // -----------------------------------------------
-    // Get candidate ID
-    // -----------------------------------------------
-
-    const candidateId =
-      Number(
-        application?.candidate_id
-      );
-
-    console.log(
-      "===================================="
-    );
-
-    console.log(
-      "Message Candidate Application:",
-      application
-    );
-
-    console.log(
-      "Candidate ID:",
-      candidateId
-    );
-
-    console.log(
-      "Candidate Name:",
-      application?.candidate_name
-    );
-
-    console.log(
-      "Candidate Email:",
-      application?.candidate_email
-    );
-
-    console.log(
-      "===================================="
-    );
-
-    // -----------------------------------------------
-    // Candidate ID validation
-    // -----------------------------------------------
+  const messageCandidate = (application) => {
+    const candidateId = Number(application?.candidate_id);
 
     if (!candidateId) {
-      alert(
-        "Candidate ID not found for this application."
-      );
-
-      console.error(
-        "Candidate ID missing from application:",
-        application
-      );
-
+      alert("Candidate information not found for this application.");
+      console.error("Candidate ID missing:", application);
       return;
     }
 
-    // -----------------------------------------------
-    // Candidate information
-    // -----------------------------------------------
-
-    const candidateName =
-      application?.candidate_name ||
-      "Candidate";
-
-    const candidateEmail =
-      application?.candidate_email ||
-      "";
-
-    // -----------------------------------------------
-    // Encode values safely
-    // -----------------------------------------------
-
-    const encodedName =
-      encodeURIComponent(
-        candidateName
-      );
-
-    const encodedEmail =
-      encodeURIComponent(
-        candidateEmail
-      );
-
-    // -----------------------------------------------
-    // IMPORTANT
-    //
-    // RecruiterMessage.jsx reads:
-    //
-    // candidateId
-    // candidateName
-    // candidateEmail
-    //
-    // from URL query parameters.
-    // -----------------------------------------------
+    const candidateName = application?.candidate_name || "Candidate";
+    const candidateEmail = application?.candidate_email || "";
 
     const messageUrl =
       `/recruiter/messages` +
       `?candidateId=${candidateId}` +
-      `&candidateName=${encodedName}` +
-      `&candidateEmail=${encodedEmail}`;
-
-    console.log(
-      "Opening recruiter message URL:",
-      messageUrl
-    );
-
-    // -----------------------------------------------
-    // Open exact candidate chat
-    // -----------------------------------------------
+      `&candidateName=${encodeURIComponent(candidateName)}` +
+      `&candidateEmail=${encodeURIComponent(candidateEmail)}`;
 
     navigate(messageUrl);
   };
 
   // =====================================================
-  // STATUS CLASS
+  // LOADING SKELETON
   // =====================================================
 
-  const getStatusClass = (
-    status
-  ) => {
-    switch (status) {
-      case "Shortlisted":
-        return "bg-green-100 text-green-700";
-
-      case "Rejected":
-        return "bg-red-100 text-red-700";
-
-      case "Hired":
-        return "bg-purple-100 text-purple-700";
-
-      case "Interview":
-        return "bg-yellow-100 text-yellow-700";
-
-      case "Screening":
-        return "bg-orange-100 text-orange-700";
-
-      default:
-        return "bg-blue-100 text-blue-700";
-    }
-  };
-
-  // =====================================================
-  // LOADING
-  // =====================================================
-
- 
-if (loading) {
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      {/* Header skeleton */}
-      <div className="mb-6 animate-pulse">
-        <div className="h-8 w-40 rounded-lg bg-gray-200" />
-        <div className="mt-3 h-4 w-72 max-w-full rounded bg-gray-100" />
-      </div>
-
-      {/* Total applications + search skeleton */}
-      <div className="mb-6 animate-pulse rounded-xl border border-gray-200 bg-white p-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="h-4 w-36 rounded bg-gray-200" />
-            <div className="mt-3 h-9 w-16 rounded bg-gray-200" />
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-8 animate-pulse">
+            <div className="h-8 w-48 rounded-lg bg-slate-200" />
+            <div className="mt-3 h-4 w-80 max-w-full rounded bg-slate-100" />
           </div>
 
-          <div className="h-12 w-full rounded-lg bg-gray-100 md:w-80" />
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5"
+              >
+                <div className="h-10 w-10 rounded-xl bg-slate-200" />
+                <div className="mt-4 h-8 w-20 rounded bg-slate-200" />
+                <div className="mt-2 h-3 w-28 rounded bg-slate-100" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-6 animate-pulse rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="h-12 w-full rounded-xl bg-slate-100" />
+          </div>
+
+          <div className="space-y-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="h-14 w-14 shrink-0 rounded-2xl bg-slate-200" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 w-48 rounded bg-slate-200" />
+                    <div className="h-3 w-64 rounded bg-slate-100" />
+                    <div className="h-3 w-40 rounded bg-slate-100" />
+                  </div>
+                  <div className="h-7 w-24 rounded-full bg-slate-100" />
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-5 lg:grid-cols-4">
+                  {[1, 2, 3, 4].map((itemIndex) => (
+                    <div key={itemIndex} className="space-y-2">
+                      <div className="h-3 w-20 rounded bg-slate-100" />
+                      <div className="h-4 w-28 rounded bg-slate-200" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Applicant cards skeleton */}
-      <div className="space-y-5">
-        {[1, 2, 3, 4].map((item) => (
-          <div
-            key={item}
-            className="animate-pulse rounded-xl border border-gray-200 bg-white p-5 sm:p-6"
-          >
-            {/* Candidate information */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="h-14 w-14 shrink-0 rounded-full bg-gray-200" />
-
-                <div className="min-w-0 flex-1">
-                  <div className="h-5 w-44 max-w-full rounded bg-gray-200" />
-
-                  <div className="mt-3 h-3 w-56 max-w-full rounded bg-gray-100" />
-
-                  <div className="mt-2 h-3 w-36 max-w-full rounded bg-gray-100" />
-                </div>
-              </div>
-
-              <div className="h-7 w-24 rounded-full bg-gray-100" />
-            </div>
-
-            {/* Job details */}
-            <div className="mt-6 grid grid-cols-1 gap-5 border-t border-gray-100 pt-5 sm:grid-cols-2 lg:grid-cols-4">
-              {[1, 2, 3, 4].map((detail) => (
-                <div key={detail}>
-                  <div className="h-3 w-20 rounded bg-gray-100" />
-                  <div className="mt-3 h-4 w-32 max-w-full rounded bg-gray-200" />
-                </div>
-              ))}
-            </div>
-
-            {/* Skills */}
-            <div className="mt-6">
-              <div className="h-3 w-16 rounded bg-gray-100" />
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[1, 2, 3, 4].map((skill) => (
-                  <div
-                    key={skill}
-                    className="h-7 w-20 rounded-full bg-gray-100"
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Footer and action buttons */}
-            <div className="mt-6 flex flex-col gap-4 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="h-4 w-36 rounded bg-gray-100" />
-
-              <div className="flex flex-wrap gap-2">
-                <div className="h-10 w-24 rounded-lg bg-gray-200" />
-                <div className="h-10 w-20 rounded-lg bg-gray-100" />
-                <div className="h-10 w-24 rounded-lg bg-gray-200" />
-                <div className="h-10 w-28 rounded-lg bg-gray-200" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   // =====================================================
   // PAGE
   // =====================================================
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+        {/* HEADER */}
 
-      <div className="mb-6">
+        <div className="mb-8">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
+              <Users size={26} />
+            </div>
 
-        <h1 className="text-2xl font-bold text-gray-900">
-          Applicants
-        </h1>
-
-        <p className="text-gray-500 mt-1">
-          Manage candidates who have applied
-          for your jobs.
-        </p>
-
-      </div>
-
-      {/* =================================================
-          TOP SECTION
-      ================================================= */}
-
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
-          {/* TOTAL APPLICATIONS */}
-
-          <div>
-
-            <p className="text-sm text-gray-500">
-              Total Applications
-            </p>
-
-            <h2 className="text-3xl font-bold text-gray-900 mt-1">
-              {applications.length}
-            </h2>
-
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                Applicants
+              </h1>
+              <p className="mt-1 text-sm text-slate-500 sm:text-base">
+                Manage job seekers who have applied for your jobs.
+              </p>
+            </div>
           </div>
+        </div>
 
-          {/* SEARCH */}
+        {/* STATS */}
 
-          <div className="relative w-full md:w-80">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            {
+              label: "Total Applications",
+              value: stats.total,
+              icon: Users,
+              accent: "from-blue-600 to-indigo-600",
+            },
+            {
+              label: "Shortlisted",
+              value: stats.shortlisted,
+              icon: CheckCircle,
+              accent: "from-emerald-600 to-teal-600",
+            },
+            {
+              label: "Pending Review",
+              value: stats.pending,
+              icon: Clock,
+              accent: "from-amber-500 to-orange-500",
+            },
+          ].map((stat) => {
+            const Icon = stat.icon;
 
+            return (
+              <div
+                key={stat.label}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+              >
+                <div className="flex items-start justify-between">
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${stat.accent} text-white shadow-sm`}
+                  >
+                    <Icon size={20} />
+                  </div>
+
+                  <TrendingUp
+                    size={18}
+                    className="text-slate-300 transition group-hover:text-slate-400"
+                  />
+                </div>
+
+                <p className="mt-4 text-3xl font-black tracking-tight text-slate-900">
+                  {stat.value}
+                </p>
+
+                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {stat.label}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* SEARCH */}
+
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={19}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
             />
 
             <input
               type="text"
-              placeholder="Search applicants..."
+              placeholder="Search by candidate name, email, job title, or company..."
               value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
-              className="
-                w-full
-                pl-10
-                pr-4
-                py-3
-                border
-                border-gray-300
-                rounded-lg
-                outline-none
-                focus:ring-2
-                focus:ring-blue-500
-                focus:border-blue-500
-              "
+              onChange={(event) => setSearch(event.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-10 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
             />
 
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                aria-label="Clear search"
+              >
+                <XCircle size={16} />
+              </button>
+            )}
           </div>
-
         </div>
 
-      </div>
+        {/* ERROR */}
 
-      {/* =================================================
-          ERROR
-      ================================================= */}
+        {error && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700">
+              <AlertCircle size={18} />
+            </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black text-red-900">
+                Something went wrong
+              </p>
+              <p className="mt-0.5 text-sm leading-6 text-red-800">
+                {error}
+              </p>
 
-          <AlertCircle size={20} />
-
-          <span>
-            {error}
-          </span>
-
-        </div>
-      )}
-
-      {/* =================================================
-          EMPTY
-      ================================================= */}
-
-      {!error &&
-        filteredApplications.length ===
-          0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-
-            <User
-              size={45}
-              className="mx-auto text-gray-300 mb-4"
-            />
-
-            <h3 className="text-lg font-semibold text-gray-800">
-              No applicants found
-            </h3>
-
-            <p className="text-gray-500 mt-1">
-              {search
-                ? "No applications match your search."
-                : "No applications have been received yet."}
-            </p>
-
+              <button
+                type="button"
+                onClick={fetchApplications}
+                className="mt-3 rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white hover:bg-red-800"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         )}
 
-      {/* =================================================
-          APPLICATIONS
-      ================================================= */}
+        {/* EMPTY STATE */}
 
-      <div className="space-y-5">
+        {!error && filteredApplications.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <User size={30} />
+            </div>
 
-        {filteredApplications.map(
-          (application) => {
+            <h3 className="mt-5 text-lg font-black text-slate-800">
+              {search ? "No matching applicants" : "No applicants yet"}
+            </h3>
 
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+              {search
+                ? "Try adjusting your search terms or clear the search to see all applicants."
+                : "Once candidates start applying to your job postings, they'll appear here."}
+            </p>
+
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800"
+              >
+                <XCircle size={15} />
+                Clear Search
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* APPLICATION CARDS */}
+
+        <div className="space-y-4">
+          {filteredApplications.map((application) => {
             const isUpdating =
-              Number(
-                updatingId
-              ) ===
-              Number(
-                application.application_id
-              );
+              Number(updatingId) === Number(application.application_id);
 
-            const applicationStatus =
-              application.status ||
-              "Applied";
+            const applicationStatus = application.status || "Applied";
+            const statusStyle = getStatusStyle(applicationStatus);
+
+            const initials = String(
+              application.candidate_name || "U"
+            )
+              .trim()
+              .split(/\s+/)
+              .map((word) => word[0])
+              .slice(0, 2)
+              .join("")
+              .toUpperCase();
 
             return (
               <div
-                key={
-                  application.application_id
-                }
-                className="
-                  bg-white
-                  rounded-xl
-                  border
-                  border-gray-200
-                  p-6
-                  hover:shadow-md
-                  transition
-                "
+                key={application.application_id}
+                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md"
               >
+                {/* CANDIDATE + STATUS */}
 
-                {/* =================================================
-                    TOP
-                ================================================= */}
-
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-
-                  {/* CANDIDATE */}
-
-                  <div className="flex items-start gap-4">
-
-                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-
-                      <User
-                        size={26}
-                        className="text-blue-600"
-                      />
-
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <h2 className="text-lg font-bold text-gray-900">
-
-                        {application.candidate_name ||
-                          "Unknown Candidate"}
-
-                      </h2>
-
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-sm text-gray-500">
-
-                        {/* EMAIL */}
-
-                        <span className="flex items-center gap-1 break-all">
-
-                          <Mail size={15} />
-
-                          {application.candidate_email ||
-                            "No email"}
-
-                        </span>
-
-                        {/* PHONE */}
-
-                        <span className="flex items-center gap-1">
-
-                          <Phone size={15} />
-
-                          {application.candidate_phone ||
-                            "No phone"}
-
-                        </span>
-
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex min-w-0 items-start gap-4">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-blue-500/20">
+                        {initials}
                       </div>
 
+                      <div className="min-w-0 flex-1">
+                        <h2 className="truncate text-lg font-black text-slate-900">
+                          {application.candidate_name || "Unknown Candidate"}
+                        </h2>
+
+                        <div className="mt-2 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                          <span className="flex items-center gap-1.5">
+                            <Mail size={14} className="shrink-0" />
+                            <span className="break-all">
+                              {application.candidate_email || "No email"}
+                            </span>
+                          </span>
+
+                          <span className="flex items-center gap-1.5">
+                            <Phone size={14} className="shrink-0" />
+                            {application.candidate_phone || "No phone"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
+                    <span
+                      className={`inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-black uppercase tracking-wide ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
+                      />
+                      {applicationStatus}
+                    </span>
                   </div>
 
-                  {/* STATUS */}
+                  {/* JOB INFORMATION */}
 
-                  <span
-                    className={`
-                      inline-flex
-                      w-fit
-                      px-3
-                      py-1
-                      rounded-full
-                      text-sm
-                      font-medium
-                      ${getStatusClass(
-                        applicationStatus
-                      )}
-                    `}
-                  >
-                    {applicationStatus}
-                  </span>
-
-                </div>
-
-                {/* =================================================
-                    JOB INFO
-                ================================================= */}
-
-                <div className="border-t border-gray-100 mt-5 pt-5">
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                    {/* JOB */}
-
-                    <div>
-
-                      <p className="text-xs text-gray-400 mb-1">
+                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-5 lg:grid-cols-4">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
                         Applied For
                       </p>
 
-                      <div className="flex items-center gap-2 text-gray-800 font-medium">
-
-                        <Briefcase
-                          size={17}
-                          className="text-gray-400"
-                        />
-
-                        <span>
-                          {application.job_title ||
-                            "N/A"}
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <Briefcase size={15} className="shrink-0 text-blue-600" />
+                        <span className="truncate text-sm font-bold text-slate-800">
+                          {application.job_title || "N/A"}
                         </span>
-
                       </div>
-
                     </div>
 
-                    {/* LOCATION */}
-
-                    <div>
-
-                      <p className="text-xs text-gray-400 mb-1">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
                         Location
                       </p>
 
-                      <div className="flex items-center gap-2 text-gray-800">
-
-                        <MapPin
-                          size={17}
-                          className="text-gray-400"
-                        />
-
-                        <span>
-                          {application.location ||
-                            "N/A"}
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <MapPin size={15} className="shrink-0 text-rose-500" />
+                        <span className="truncate text-sm font-bold text-slate-800">
+                          {application.location || "N/A"}
                         </span>
-
                       </div>
-
                     </div>
 
-                    {/* EXPERIENCE */}
-
-                    <div>
-
-                      <p className="text-xs text-gray-400 mb-1">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
                         Experience
                       </p>
 
-                      <div className="text-gray-800">
-
-                        {application.experience ||
-                          "Not specified"}
-
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <Briefcase size={15} className="shrink-0 text-violet-500" />
+                        <span className="truncate text-sm font-bold text-slate-800">
+                          {application.experience || "Not specified"}
+                        </span>
                       </div>
-
                     </div>
 
-                    {/* APPLIED DATE */}
-
-                    <div>
-
-                      <p className="text-xs text-gray-400 mb-1">
-                        Applied Date
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                        Applied On
                       </p>
 
-                      <div className="flex items-center gap-2 text-gray-800">
-
-                        <CalendarDays
-                          size={17}
-                          className="text-gray-400"
-                        />
-
-                        <span>
-                          {application.applied_at ||
-                            "N/A"}
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <CalendarDays size={15} className="shrink-0 text-emerald-600" />
+                        <span className="truncate text-sm font-bold text-slate-800">
+                          {application.applied_at || "N/A"}
                         </span>
-
                       </div>
-
                     </div>
-
                   </div>
 
-                </div>
+                  {/* SKILLS */}
 
-                {/* =================================================
-                    SKILLS
-                ================================================= */}
+                  {Array.isArray(application.skills) &&
+                    application.skills.length > 0 && (
+                      <div className="mt-5">
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-slate-400">
+                          Skills
+                        </p>
 
-                <div className="mt-5">
-
-                  <p className="text-xs text-gray-400 mb-2">
-                    Skills
-                  </p>
-
-                  <div className="flex flex-wrap gap-2">
-
-                    {Array.isArray(
-                      application.skills
-                    ) &&
-                    application.skills.length >
-                      0 ? (
-                      application.skills.map(
-                        (
-                          skill,
-                          index
-                        ) => (
-                          <span
-                            key={
-                              `${application.application_id}-${index}`
-                            }
-                            className="
-                              px-3
-                              py-1
-                              bg-gray-100
-                              text-gray-700
-                              rounded-full
-                              text-sm
-                            "
-                          >
-                            {skill}
-                          </span>
-                        )
-                      )
-                    ) : (
-                      <span className="text-sm text-gray-400">
-                        No skills added
-                      </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {application.skills.map((skill, index) => (
+                            <span
+                              key={`${application.application_id}-${index}`}
+                              className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     )}
-
-                  </div>
-
                 </div>
 
-                {/* =================================================
-                    FOOTER
-                ================================================= */}
+                {/* FOOTER — ID HIDDEN, ACTIONS KEPT */}
 
-                <div className="border-t border-gray-100 mt-5 pt-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:px-6">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-end">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {applicationStatus !== "Shortlisted" &&
+                        applicationStatus !== "Rejected" &&
+                        applicationStatus !== "Hired" && (
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() =>
+                              updateApplicationStatus(
+                                application.application_id,
+                                "Shortlisted"
+                              )
+                            }
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isUpdating ? (
+                              <Loader2 size={15} className="animate-spin" />
+                            ) : (
+                              <CheckCircle size={15} />
+                            )}
+                            Shortlist
+                          </button>
+                        )}
 
-                  {/* APPLICATION ID */}
+                      {applicationStatus !== "Rejected" &&
+                        applicationStatus !== "Hired" && (
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() =>
+                              updateApplicationStatus(
+                                application.application_id,
+                                "Rejected"
+                              )
+                            }
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-red-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isUpdating ? (
+                              <Loader2 size={15} className="animate-spin" />
+                            ) : (
+                              <XCircle size={15} />
+                            )}
+                            Reject
+                          </button>
+                        )}
 
-                  <div className="text-sm text-gray-500">
+                      <button
+                        type="button"
+                        onClick={() => messageCandidate(application)}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
+                      >
+                        <MessageCircle size={15} />
+                        Message
+                      </button>
 
-                    Application ID:{" "}
-
-                    <span className="font-medium text-gray-700">
-
-                      #
-                      {
-                        application.application_id
-                      }
-
-                    </span>
-
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/recruiter/applicant/${application.application_id}`,
+                            {
+                              state: { application },
+                            }
+                          )
+                        }
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-slate-800 hover:shadow-md"
+                      >
+                        <Eye size={15} />
+                        View Details
+                      </button>
+                    </div>
                   </div>
-
-                  {/* ACTION BUTTONS */}
-
-                  <div className="flex flex-wrap items-center gap-2">
-
-                    {/* =================================================
-                        SHORTLIST
-                    ================================================= */}
-
-                    {applicationStatus !==
-                      "Shortlisted" &&
-                      applicationStatus !==
-                        "Rejected" &&
-                      applicationStatus !==
-                        "Hired" && (
-
-                        <button
-                          type="button"
-                          disabled={
-                            isUpdating
-                          }
-                          onClick={() =>
-                            updateApplicationStatus(
-                              application.application_id,
-                              "Shortlisted"
-                            )
-                          }
-                          className="
-                            flex
-                            items-center
-                            justify-center
-                            gap-2
-                            px-4
-                            py-2.5
-                            bg-green-600
-                            text-white
-                            rounded-lg
-                            hover:bg-green-700
-                            disabled:opacity-60
-                            disabled:cursor-not-allowed
-                            transition
-                          "
-                        >
-
-                          {isUpdating ? (
-                            <Loader2
-                              size={17}
-                              className="animate-spin"
-                            />
-                          ) : (
-                            <CheckCircle
-                              size={17}
-                            />
-                          )}
-
-                          Shortlist
-
-                        </button>
-                      )}
-
-                    {/* =================================================
-                        REJECT
-                    ================================================= */}
-
-                    {applicationStatus !==
-                      "Rejected" &&
-                      applicationStatus !==
-                        "Hired" && (
-
-                        <button
-                          type="button"
-                          disabled={
-                            isUpdating
-                          }
-                          onClick={() =>
-                            updateApplicationStatus(
-                              application.application_id,
-                              "Rejected"
-                            )
-                          }
-                          className="
-                            flex
-                            items-center
-                            justify-center
-                            gap-2
-                            px-4
-                            py-2.5
-                            bg-red-600
-                            text-white
-                            rounded-lg
-                            hover:bg-red-700
-                            disabled:opacity-60
-                            disabled:cursor-not-allowed
-                            transition
-                          "
-                        >
-
-                          {isUpdating ? (
-                            <Loader2
-                              size={17}
-                              className="animate-spin"
-                            />
-                          ) : (
-                            <XCircle
-                              size={17}
-                            />
-                          )}
-
-                          Reject
-
-                        </button>
-                      )}
-
-                    {/* =================================================
-                        MESSAGE CANDIDATE
-                    ================================================= */}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        messageCandidate(
-                          application
-                        )
-                      }
-                      className="
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
-                        px-4
-                        py-2.5
-                        bg-blue-600
-                        text-white
-                        rounded-lg
-                        hover:bg-blue-700
-                        transition
-                      "
-                    >
-
-                      <MessageCircle
-                        size={17}
-                      />
-
-                      Message
-
-                    </button>
-
-                    {/* =================================================
-                        VIEW DETAILS
-                    ================================================= */}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          `/recruiter/applicant/${application.application_id}`,
-                          {
-                            state: {
-                              application:
-                                application,
-                            },
-                          }
-                        )
-                      }
-                      className="
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
-                        px-4
-                        py-2.5
-                        bg-gray-900
-                        text-white
-                        rounded-lg
-                        hover:bg-gray-800
-                        transition
-                      "
-                    >
-
-                      <Eye
-                        size={17}
-                      />
-
-                      View Details
-
-                    </button>
-
-                  </div>
-
                 </div>
-
               </div>
             );
-          }
-        )}
-
+          })}
+        </div>
       </div>
-
     </div>
   );
 };

@@ -237,7 +237,7 @@ const Footer = () => {
           {/* FOR CANDIDATES */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              For Candidates
+              For Job Seekers
             </h3>
 
             <div className="flex flex-col gap-3 text-sm">

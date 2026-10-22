@@ -123,11 +123,11 @@ const getImageUrl = (image) => {
 
   // Root relative
   if (image.startsWith("/")) {
-    return `http://192.168.1.50${image}`;
+    return `http://http://localhost${image}`;
   }
 
   // Relative path
-  return `http://192.168.1.50/job_portal/job-portal-api/${image}`;
+  return `http://http://localhost/job_portal/job-portal-api/${image}`;
 };
 
 /* =========================================================

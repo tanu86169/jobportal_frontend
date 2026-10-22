@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User,
@@ -13,6 +13,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import axios from "axios";
+import API_BASE from "../Config/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -43,6 +46,7 @@ const Register = () => {
       ...prev,
       [name]: "",
     }));
+    setRequestError("");
   };
 
   const validateForm = () => {
@@ -85,39 +89,40 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    if (!validateForm()) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        "import.meta.env.VITE_API_URL/api/auth/register.php",
-        {
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-          role: formData.role === "job-seeker" ? "candidate" : "recruiter",
-        },
-      );
+  if (loading || !validateForm()) return;
 
-      if (response.data.success) {
-        alert(response.data.message);
-
-        navigate("/login");
-      } else {
-        alert(response.data.message);
+  try {
+    setLoading(true);
+    setRequestError("");
+    const response = await axios.post(
+      `${API_BASE}/auth/register.php`,
+      {
+        name: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        role: formData.role === "job-seeker" ? "candidate" : "recruiter",
       }
-    } catch (error) {
-      console.error("Registration Error:", error);
+    );
 
-      alert(
-        error.response?.data?.message ||
-          "Registration failed. Please try again.",
-      );
+    if (response.data.success) {
+      navigate("/login");
+    } else {
+      setRequestError(response.data.message || "Registration could not be completed.");
     }
-  };
+  } catch (error) {
+    setRequestError(
+      error.response?.data?.message ||
+        "Could not connect to the registration service. Check the API URL and try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-10">
@@ -187,6 +192,15 @@ const Register = () => {
               Join JobPortal and start your journey today.
             </p>
           </div>
+
+          {requestError && (
+            <div
+              role="alert"
+              className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              {requestError}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* FULL NAME */}
@@ -443,10 +457,11 @@ const Register = () => {
             {/* CREATE ACCOUNT */}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-100"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create Account
-              <ArrowRight className="w-5 h-5" />
+              {loading ? "Creating account..." : "Create Account"}
+              {!loading && <ArrowRight className="w-5 h-5" />}
             </button>
           </form>
 

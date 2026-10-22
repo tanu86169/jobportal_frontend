@@ -170,7 +170,7 @@ const RecruiterLayout = () => {
     },
 
     {
-      label: "Find Candidates",
+      label: "Find Job Seekers",
       icon: Search,
       path: "/recruiter/find-candidates",
     },

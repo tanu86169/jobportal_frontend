@@ -1246,7 +1246,7 @@ const CandidateDashboard = () => {
           <div className="min-w-0 flex-1">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-blue-50 ring-1 ring-inset ring-white/20 sm:text-xs">
               <Sparkles size={12} />
-              Candidate Workspace
+              Job Seeker Workspace
             </div>
 
             <h1 className="mt-3 truncate text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">

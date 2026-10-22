@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../Components/Header";
@@ -22,23 +23,24 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+import API_BASE from "../Config/api";
+
 // ======================================================
 // API
 // ======================================================
 
-import API_BASE from "../Config/api";
+const API_ROOT = String(API_BASE || "").replace(/\/+$/, "");
 
-const JOBS_API = `${API_BASE}/jobs/get-all.php`;
+const JOBS_API = `${API_ROOT}/jobs/get-all.php`;
+const TRACK_JOB_VIEW_API = `${API_ROOT}/jobs/track-view.php`;
+const CHECK_APPLICATION_API = `${API_ROOT}/applications/check.php`;
+const SAVE_JOB_API = `${API_ROOT}/savedJobs/save.php`;
+const GET_SAVED_JOB_API = `${API_ROOT}/savedJobs/get.php`;
+const REMOVE_SAVED_JOB_API = `${API_ROOT}/savedJobs/remove.php`;
 
-const TRACK_JOB_VIEW_API = `${API_BASE}/jobs/track-view.php`;
-
-const CHECK_APPLICATION_API = `${API_BASE}/applications/check.php`;
-
-const SAVE_JOB_API = `${API_BASE}/savedJobs/save.php`;
-
-const GET_SAVED_JOB_API = `${API_BASE}/savedJobs/get.php`;
-
-const REMOVE_SAVED_JOB_API = `${API_BASE}/savedJobs/remove.php`;
+// ======================================================
+// RECORD JOB VIEW
+// ======================================================
 
 const recordJobView = (jobId) => {
   const storageKey = `job-view:${jobId}`;
@@ -46,10 +48,12 @@ const recordJobView = (jobId) => {
 
   try {
     viewKey = sessionStorage.getItem(storageKey);
+
     if (!viewKey) {
       viewKey =
         globalThis.crypto?.randomUUID?.() ||
         `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
       sessionStorage.setItem(storageKey, viewKey);
     }
   } catch {
@@ -59,10 +63,22 @@ const recordJobView = (jobId) => {
   fetch(TRACK_JOB_VIEW_API, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ job_id: Number(jobId), view_key: viewKey }),
+    body: JSON.stringify({
+      job_id: Number(jobId),
+      view_key: viewKey,
+    }),
   }).catch((error) => {
     console.error("Record job view error:", error);
   });
+};
+
+// ======================================================
+// COMPANY INITIAL
+// ======================================================
+
+const getCompanyInitial = (companyName) => {
+  const name = String(companyName || "").trim();
+  return name ? name.charAt(0).toUpperCase() : "C";
 };
 
 // ======================================================
@@ -133,7 +149,10 @@ const getDaysAgo = (date) => {
 
   const difference = today.getTime() - createdDate.getTime();
 
-  return Math.max(Math.floor(difference / (1000 * 60 * 60 * 24)), 0);
+  return Math.max(
+    Math.floor(difference / (1000 * 60 * 60 * 24)),
+    0,
+  );
 };
 
 // ======================================================
@@ -143,13 +162,8 @@ const getDaysAgo = (date) => {
 const getPostedText = (date) => {
   const days = getDaysAgo(date);
 
-  if (days === 0) {
-    return "Posted today";
-  }
-
-  if (days === 1) {
-    return "Posted 1 day ago";
-  }
+  if (days === 0) return "Posted today";
+  if (days === 1) return "Posted 1 day ago";
 
   if (days < 7) {
     return `Posted ${days} days ago`;
@@ -158,12 +172,16 @@ const getPostedText = (date) => {
   if (days < 30) {
     const weeks = Math.floor(days / 7);
 
-    return weeks === 1 ? "Posted 1 week ago" : `Posted ${weeks} weeks ago`;
+    return weeks === 1
+      ? "Posted 1 week ago"
+      : `Posted ${weeks} weeks ago`;
   }
 
   const months = Math.floor(days / 30);
 
-  return months === 1 ? "Posted 1 month ago" : `Posted ${months} months ago`;
+  return months === 1
+    ? "Posted 1 month ago"
+    : `Posted ${months} months ago`;
 };
 
 // ======================================================
@@ -174,12 +192,16 @@ const textToArray = (value) => {
   if (!value) return [];
 
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
+    return value
+      .map((item) => String(item).trim())
+      .filter(Boolean);
   }
 
   return String(value)
     .split(/\r?\n|•/)
-    .map((item) => item.replace(/^\s*[-*0-9.)]+\s*/, "").trim())
+    .map((item) =>
+      item.replace(/^\s*[-*0-9.)]+\s*/, "").trim(),
+    )
     .filter(Boolean);
 };
 
@@ -190,7 +212,7 @@ const textToArray = (value) => {
 const getCurrentUser = () => {
   try {
     return JSON.parse(localStorage.getItem("user") || "null");
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -223,10 +245,6 @@ const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // ====================================================
-  // STATES
-  // ====================================================
-
   const [job, setJob] = useState(null);
   const [allJobs, setAllJobs] = useState([]);
 
@@ -236,7 +254,8 @@ const JobDetails = () => {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [checkingApplication, setCheckingApplication] = useState(false);
+  const [checkingApplication, setCheckingApplication] =
+    useState(false);
 
   const [applied, setApplied] = useState(false);
 
@@ -254,14 +273,18 @@ const JobDetails = () => {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to fetch jobs");
+          throw new Error(
+            data.message || "Failed to fetch jobs",
+          );
         }
 
         const jobs = Array.isArray(data.jobs) ? data.jobs : [];
 
         setAllJobs(jobs);
 
-        const foundJob = jobs.find((item) => Number(item.id) === Number(id));
+        const foundJob = jobs.find(
+          (item) => Number(item.id) === Number(id),
+        );
 
         if (!foundJob) {
           throw new Error("Job not found");
@@ -271,7 +294,6 @@ const JobDetails = () => {
         recordJobView(foundJob.id);
       } catch (err) {
         console.error("Job Details Error:", err);
-
         setError(err.message || "Unable to load job details.");
       } finally {
         setLoading(false);
@@ -286,12 +308,15 @@ const JobDetails = () => {
   // ====================================================
 
   useEffect(() => {
+    let cancelled = false;
+
     const checkApplication = async () => {
       const user = getCurrentUser();
       const candidateId = getCandidateId();
 
       if (!user || user.role !== "candidate" || !id || !candidateId) {
         setApplied(false);
+        setCheckingApplication(false);
         return;
       }
 
@@ -299,27 +324,34 @@ const JobDetails = () => {
         setCheckingApplication(true);
 
         const response = await fetch(
-          `${CHECK_APPLICATION_API}?jobId=${Number(
-            id,
-          )}&candidateId=${Number(candidateId)}`,
+          `${CHECK_APPLICATION_API}?jobId=${Number(id)}&candidateId=${Number(candidateId)}`,
         );
 
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          console.error("Check Application Error:", data.message);
-          return;
+          throw new Error(
+            data.message || "Unable to check application",
+          );
         }
 
-        setApplied(data.applied === true);
-      } catch (error) {
-        console.error("Check Application Error:", error);
+        if (!cancelled) {
+          setApplied(data.applied === true);
+        }
+      } catch (err) {
+        console.error("Check Application Error:", err);
       } finally {
-        setCheckingApplication(false);
+        if (!cancelled) {
+          setCheckingApplication(false);
+        }
       }
     };
 
     checkApplication();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   // ====================================================
@@ -327,6 +359,8 @@ const JobDetails = () => {
   // ====================================================
 
   useEffect(() => {
+    let cancelled = false;
+
     const checkSavedJob = async () => {
       const user = getCurrentUser();
 
@@ -350,25 +384,36 @@ const JobDetails = () => {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          setSaved(false);
-          return;
+          throw new Error(
+            data.message || "Unable to fetch saved jobs",
+          );
         }
 
-        const savedJobs = Array.isArray(data.saved_jobs) ? data.saved_jobs : [];
+        const savedJobs = Array.isArray(data.saved_jobs)
+          ? data.saved_jobs
+          : [];
 
         const isSaved = savedJobs.some(
           (item) => Number(item.job_id) === Number(id),
         );
 
-        setSaved(isSaved);
-      } catch (error) {
-        console.error("Check Saved Job Error:", error);
+        if (!cancelled) {
+          setSaved(isSaved);
+        }
+      } catch (err) {
+        console.error("Check Saved Job Error:", err);
 
-        setSaved(false);
+        if (!cancelled) {
+          setSaved(false);
+        }
       }
     };
 
     checkSavedJob();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   // ====================================================
@@ -389,17 +434,19 @@ const JobDetails = () => {
   // RESPONSIBILITIES
   // ====================================================
 
-  const responsibilities = useMemo(() => {
-    return textToArray(job?.responsibilities);
-  }, [job]);
+  const responsibilities = useMemo(
+    () => textToArray(job?.responsibilities),
+    [job],
+  );
 
   // ====================================================
   // REQUIREMENTS
   // ====================================================
 
-  const requirements = useMemo(() => {
-    return textToArray(job?.requirements);
-  }, [job]);
+  const requirements = useMemo(
+    () => textToArray(job?.requirements),
+    [job],
+  );
 
   // ====================================================
   // RECOMMENDED JOBS
@@ -408,7 +455,9 @@ const JobDetails = () => {
   const recommendedJobs = useMemo(() => {
     if (!job) return [];
 
-    const others = allJobs.filter((item) => Number(item.id) !== Number(job.id));
+    const others = allJobs.filter(
+      (item) => Number(item.id) !== Number(job.id),
+    );
 
     const currentCategory = String(job.category || "")
       .trim()
@@ -416,16 +465,14 @@ const JobDetails = () => {
 
     const sameCategory = others.filter(
       (item) =>
-        String(item.category || "")
-          .trim()
-          .toLowerCase() === currentCategory,
+        String(item.category || "").trim().toLowerCase() ===
+        currentCategory,
     );
 
     const otherCategory = others.filter(
       (item) =>
-        String(item.category || "")
-          .trim()
-          .toLowerCase() !== currentCategory,
+        String(item.category || "").trim().toLowerCase() !==
+        currentCategory,
     );
 
     return [...sameCategory, ...otherCategory].slice(0, 5);
@@ -445,7 +492,6 @@ const JobDetails = () => {
           message: "Please login as a candidate to save this job.",
         },
       });
-
       return;
     }
 
@@ -458,43 +504,17 @@ const JobDetails = () => {
 
     if (!candidateId) {
       alert("Candidate information is missing. Please login again.");
-
       return;
     }
 
-    if (!id) return;
+    if (!id || saving) return;
 
     try {
       setSaving(true);
 
-      // REMOVE SAVED JOB
-      if (saved) {
-        const response = await fetch(REMOVE_SAVED_JOB_API, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            candidate_id: Number(candidateId),
-            job_id: Number(id),
-          }),
-        });
+      const endpoint = saved ? REMOVE_SAVED_JOB_API : SAVE_JOB_API;
 
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          alert(data.message || "Unable to remove saved job.");
-
-          return;
-        }
-
-        setSaved(false);
-
-        return;
-      }
-
-      // SAVE JOB
-      const response = await fetch(SAVE_JOB_API, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -508,16 +528,19 @@ const JobDetails = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.message || "Unable to save job.");
-
+        alert(
+          data.message ||
+            (saved
+              ? "Unable to remove saved job."
+              : "Unable to save job."),
+        );
         return;
       }
 
-      setSaved(true);
-    } catch (error) {
-      console.error("Save Job Error:", error);
-
-      alert("Unable to save job. Please try again.");
+      setSaved(!saved);
+    } catch (err) {
+      console.error("Save Job Error:", err);
+      alert("Unable to update saved job. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -530,9 +553,13 @@ const JobDetails = () => {
   const handleApply = () => {
     const user = getCurrentUser();
 
+    if (!isJobActive) {
+      alert("This job is inactive and is no longer accepting applications.");
+      return;
+    }
+
     if (applied) {
       alert("You have already applied for this job.");
-
       return;
     }
 
@@ -543,13 +570,11 @@ const JobDetails = () => {
           message: "Please login to apply for this job.",
         },
       });
-
       return;
     }
 
     if (user.role !== "candidate") {
       alert("Only candidates can apply for jobs.");
-
       return;
     }
 
@@ -557,12 +582,9 @@ const JobDetails = () => {
 
     if (!candidateId) {
       alert("Candidate information is missing. Please login again.");
-
       return;
     }
 
-    // IMPORTANT:
-    // Apply page par resume + cover letter upload hoga.
     navigate(`/apply/${id}`);
   };
 
@@ -575,11 +597,9 @@ const JobDetails = () => {
 
     const shareData = {
       title: job.job_title || "Job Opportunity",
-
       text: `Check out this job: ${job.job_title || ""} at ${
         job.company_name || ""
       }`,
-
       url: window.location.href,
     };
 
@@ -588,11 +608,11 @@ const JobDetails = () => {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-
         alert("Job link copied successfully!");
       }
-    } catch (error) {
-      console.log("Share cancelled");
+    } catch {
+      // User cancelled sharing or clipboard access was unavailable.
+      console.log("Share cancelled or unavailable");
     }
   };
 
@@ -639,7 +659,9 @@ const JobDetails = () => {
               <BriefcaseBusiness size={28} className="text-red-500" />
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-900">Job not found</h2>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Job not found
+            </h2>
 
             <p className="mt-2 text-sm text-slate-500">
               {error || "The requested job could not be found."}
@@ -664,25 +686,30 @@ const JobDetails = () => {
   // JOB DATA
   // ====================================================
 
-  const companyLogo =
-    job.company_logo_url ||
-    getAssetUrl(job.company_logo) ||
-    getAssetUrl(job.logo);
-
   const openings = getOpenings(job);
 
   const applicants =
-    job.applicants_count ?? job.applicants ?? job.total_applicants ?? null;
+    job.applicants_count ??
+    job.applicants ??
+    job.total_applicants ??
+    null;
+
+  const isJobActive =
+    String(job.status || "active").trim().toLowerCase() === "active";
 
   const applyButtonText = applied
     ? "Applied"
     : checkingApplication
       ? "Checking..."
-      : "Apply Now";
+      : !isJobActive
+        ? "Applications Closed"
+        : "Apply Now";
 
-  const saveButtonText = saving ? "Saving..." : saved ? "Saved" : "Save";
-
-  const isActive = String(job.status || "active").toLowerCase() === "active";
+  const saveButtonText = saving
+    ? "Saving..."
+    : saved
+      ? "Saved"
+      : "Save";
 
   // ====================================================
   // MAIN UI
@@ -693,7 +720,6 @@ const JobDetails = () => {
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        {/* BACK */}
         <button
           type="button"
           onClick={() => navigate("/jobs")}
@@ -703,9 +729,7 @@ const JobDetails = () => {
           Back to Jobs
         </button>
 
-        {/* TWO COLUMN */}
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          {/* LEFT */}
           <div className="space-y-6">
             {/* JOB SUMMARY */}
             <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -729,26 +753,14 @@ const JobDetails = () => {
                     </p>
                   </div>
 
-                  {/* LOGO */}
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 sm:h-24 sm:w-24">
-                    {companyLogo ? (
-                      <img
-                        src={companyLogo}
-                        alt={job.company_name || "Company"}
-                        className="h-full w-full object-contain p-3"
-                        onError={(event) => {
-                          event.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <span className="text-3xl font-bold text-blue-600">
-                        {(job.company_name || "C").charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                  {/* COMPANY INITIAL — NO LOGO IMAGE */}
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 sm:h-24 sm:w-24">
+                    <span className="text-3xl font-bold text-blue-600">
+                      {getCompanyInitial(job.company_name)}
+                    </span>
                   </div>
                 </div>
 
-                {/* META */}
                 <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 border-b border-slate-100 pb-5 text-sm text-slate-600">
                   <span className="flex items-center gap-2">
                     <BriefcaseBusiness size={17} className="text-slate-400" />
@@ -766,7 +778,6 @@ const JobDetails = () => {
                   </span>
                 </div>
 
-                {/* POSTED / OPENINGS */}
                 <div className="flex flex-col gap-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
                     <span className="text-slate-500">
@@ -787,10 +798,7 @@ const JobDetails = () => {
 
                     {applicants !== null && (
                       <>
-                        <span className="hidden text-slate-300 sm:block">
-                          |
-                        </span>
-
+                        <span className="hidden text-slate-300 sm:block">|</span>
                         <span className="text-slate-500">
                           Applicants:{" "}
                           <strong className="font-semibold text-slate-900">
@@ -801,9 +809,7 @@ const JobDetails = () => {
                     )}
                   </div>
 
-                  {/* ACTIONS */}
                   <div className="flex gap-3">
-                    {/* SAVE */}
                     <button
                       type="button"
                       onClick={handleSave}
@@ -821,21 +827,23 @@ const JobDetails = () => {
                       ) : (
                         <Bookmark size={18} />
                       )}
-
                       {saveButtonText}
                     </button>
 
-                    {/* APPLY */}
                     <button
                       type="button"
                       onClick={handleApply}
-                      disabled={applied || checkingApplication}
-                      className={`flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition ${
+                      disabled={
+                        applied || checkingApplication || !isJobActive
+                      }
+                      className={`flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed ${
                         applied
-                          ? "cursor-default bg-green-600"
-                          : checkingApplication
-                            ? "cursor-not-allowed bg-blue-400"
-                            : "bg-blue-600 hover:bg-blue-700"
+                          ? "bg-green-600"
+                          : !isJobActive
+                            ? "bg-slate-400"
+                            : checkingApplication
+                              ? "bg-blue-400"
+                              : "bg-blue-600 hover:bg-blue-700"
                       }`}
                     >
                       {applied ? (
@@ -843,7 +851,6 @@ const JobDetails = () => {
                       ) : (
                         <Send size={18} />
                       )}
-
                       {applyButtonText}
                     </button>
                   </div>
@@ -862,9 +869,7 @@ const JobDetails = () => {
                   <HighlightItem
                     icon={<Users />}
                     label="Openings"
-                    value={`${openings} ${
-                      openings === 1 ? "Opening" : "Openings"
-                    }`}
+                    value={`${openings} ${openings === 1 ? "Opening" : "Openings"}`}
                   />
 
                   <HighlightItem
@@ -873,12 +878,11 @@ const JobDetails = () => {
                     value={job.job_type || "Not specified"}
                   />
 
-                  
-<HighlightItem
-  icon={<BriefcaseBusiness />}
-  label="Position"
-  value={job.position || "Not specified"}
-/>
+                  <HighlightItem
+                    icon={<BriefcaseBusiness />}
+                    label="Position"
+                    value={job.position || "Not specified"}
+                  />
 
                   <HighlightItem
                     icon={<Clock3 />}
@@ -907,10 +911,8 @@ const JobDetails = () => {
               </div>
             </section>
 
-            {/* DESCRIPTION */}
             <ContentSection title="Job Description" text={job.description} />
 
-            {/* RESPONSIBILITIES */}
             {responsibilities.length > 0 && (
               <BulletSection
                 title="Key Responsibilities"
@@ -918,12 +920,13 @@ const JobDetails = () => {
               />
             )}
 
-            {/* REQUIREMENTS */}
             {requirements.length > 0 && (
-              <BulletSection title="Requirements" items={requirements} />
+              <BulletSection
+                title="Requirements"
+                items={requirements}
+              />
             )}
 
-            {/* SKILLS */}
             {skills.length > 0 && (
               <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
                 <h2 className="text-xl font-bold text-slate-900">
@@ -943,25 +946,18 @@ const JobDetails = () => {
               </section>
             )}
 
-            {/* COMPANY */}
+            {/* ABOUT COMPANY */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
               <h2 className="text-xl font-bold text-slate-900">
                 About the Company
               </h2>
 
               <div className="mt-5 flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                  {companyLogo ? (
-                    <img
-                      src={companyLogo}
-                      alt={job.company_name || "Company"}
-                      className="h-full w-full object-contain p-2"
-                    />
-                  ) : (
-                    <span className="text-2xl font-bold text-blue-600">
-                      {(job.company_name || "C").charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                {/* COMPANY INITIAL — NO LOGO IMAGE */}
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50">
+                  <span className="text-2xl font-bold text-blue-600">
+                    {getCompanyInitial(job.company_name)}
+                  </span>
                 </div>
 
                 <div>
@@ -992,17 +988,20 @@ const JobDetails = () => {
                 <button
                   type="button"
                   onClick={handleApply}
-                  disabled={applied || checkingApplication}
-                  className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition ${
+                  disabled={
+                    applied || checkingApplication || !isJobActive
+                  }
+                  className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition disabled:cursor-not-allowed ${
                     applied
-                      ? "cursor-default bg-green-100 text-green-700"
-                      : checkingApplication
-                        ? "cursor-not-allowed bg-blue-100 text-blue-400"
-                        : "bg-white text-blue-600 hover:bg-blue-50"
+                      ? "bg-green-100 text-green-700"
+                      : !isJobActive
+                        ? "bg-slate-200 text-slate-500"
+                        : checkingApplication
+                          ? "bg-blue-100 text-blue-400"
+                          : "bg-white text-blue-600 hover:bg-blue-50"
                   }`}
                 >
                   {applied ? <CheckCircle2 size={19} /> : <Send size={19} />}
-
                   {applyButtonText}
                 </button>
               </div>
@@ -1020,34 +1019,25 @@ const JobDetails = () => {
 
                 <div className="mt-3 divide-y divide-slate-100">
                   {recommendedJobs.map((recommendedJob) => {
-                    const recommendedLogo =
-                      recommendedJob.company_logo_url ||
-                      getAssetUrl(recommendedJob.company_logo) ||
-                      getAssetUrl(recommendedJob.logo);
-
-                    const recommendedOpenings = getOpenings(recommendedJob);
+                    const recommendedOpenings =
+                      getOpenings(recommendedJob);
 
                     return (
                       <button
                         key={recommendedJob.id}
                         type="button"
-                        onClick={() => navigate(`/jobs/${recommendedJob.id}`)}
+                        onClick={() =>
+                          navigate(`/jobs/${recommendedJob.id}`)
+                        }
                         className="group flex w-full gap-4 py-5 text-left"
                       >
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                          {recommendedLogo ? (
-                            <img
-                              src={recommendedLogo}
-                              alt={recommendedJob.company_name || "Company"}
-                              className="h-full w-full object-contain p-2"
-                            />
-                          ) : (
-                            <span className="text-xl font-bold text-blue-600">
-                              {(recommendedJob.company_name || "C")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </span>
-                          )}
+                        {/* COMPANY INITIAL — NO LOGO IMAGE */}
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50">
+                          <span className="text-xl font-bold text-blue-600">
+                            {getCompanyInitial(
+                              recommendedJob.company_name,
+                            )}
+                          </span>
                         </div>
 
                         <div className="min-w-0 flex-1">
@@ -1068,7 +1058,6 @@ const JobDetails = () => {
 
                           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
                             <MapPin size={13} />
-
                             <span className="truncate">
                               {recommendedJob.location || "India"}
                             </span>
@@ -1105,15 +1094,13 @@ const JobDetails = () => {
                 <InfoItem
                   icon={<CheckCircle2 />}
                   label="Job Status"
-                  value={isActive ? "Active" : job.status || "Inactive"}
+                  value={isJobActive ? "Active" : job.status || "Inactive"}
                 />
 
                 <InfoItem
                   icon={<Users />}
                   label="Openings"
-                  value={`${openings} ${
-                    openings === 1 ? "Opening" : "Openings"
-                  }`}
+                  value={`${openings} ${openings === 1 ? "Opening" : "Openings"}`}
                 />
 
                 <InfoItem
@@ -1159,8 +1146,11 @@ const JobDetails = () => {
                   disabled={saving}
                   className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {saved ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
-
+                  {saved ? (
+                    <BookmarkCheck size={17} />
+                  ) : (
+                    <Bookmark size={17} />
+                  )}
                   {saveButtonText}
                 </button>
 
@@ -1187,25 +1177,21 @@ const JobDetails = () => {
 // HIGHLIGHT ITEM
 // ======================================================
 
-const HighlightItem = ({ icon, label, value }) => {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-        {React.cloneElement(icon, {
-          size: 19,
-        })}
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-slate-400">{label}</p>
-
-        <p className="mt-1 break-words text-sm font-semibold text-slate-800">
-          {value}
-        </p>
-      </div>
+const HighlightItem = ({ icon, label, value }) => (
+  <div className="flex items-start gap-3">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+      {React.cloneElement(icon, { size: 19 })}
     </div>
-  );
-};
+
+    <div className="min-w-0">
+      <p className="text-xs font-medium text-slate-400">{label}</p>
+
+      <p className="mt-1 break-words text-sm font-semibold text-slate-800">
+        {value}
+      </p>
+    </div>
+  </div>
+);
 
 // ======================================================
 // CONTENT SECTION
@@ -1230,9 +1216,7 @@ const ContentSection = ({ title, text }) => {
 // ======================================================
 
 const BulletSection = ({ title, items }) => {
-  if (!items || items.length === 0) {
-    return null;
-  }
+  if (!items || items.length === 0) return null;
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
@@ -1245,7 +1229,6 @@ const BulletSection = ({ title, items }) => {
             className="flex items-start gap-3 text-sm leading-6 text-slate-600"
           >
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
-
             <span>{item}</span>
           </li>
         ))}
@@ -1258,24 +1241,20 @@ const BulletSection = ({ title, items }) => {
 // INFO ITEM
 // ======================================================
 
-const InfoItem = ({ icon, label, value }) => {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 text-blue-600">
-        {React.cloneElement(icon, {
-          size: 19,
-        })}
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-xs text-slate-400">{label}</p>
-
-        <p className="mt-1 break-words text-sm font-semibold text-slate-700">
-          {value}
-        </p>
-      </div>
+const InfoItem = ({ icon, label, value }) => (
+  <div className="flex items-start gap-3">
+    <div className="mt-0.5 text-blue-600">
+      {React.cloneElement(icon, { size: 19 })}
     </div>
-  );
-};
+
+    <div className="min-w-0">
+      <p className="text-xs text-slate-400">{label}</p>
+
+      <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+        {value}
+      </p>
+    </div>
+  </div>
+);
 
 export default JobDetails;

@@ -23,6 +23,14 @@ import {
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 
+const isCandidateRole = (value) => {
+  const role = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  return role === "candidate" || role === "job-seeker";
+};
+
 const CandidateLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,11 +52,7 @@ const CandidateLayout = () => {
 
       const parsedUser = JSON.parse(storedUser);
 
-      const role = String(parsedUser?.role || "")
-        .toLowerCase()
-        .trim();
-
-      if (!parsedUser?.id || role !== "candidate") {
+      if (!parsedUser?.id || !isCandidateRole(parsedUser?.role)) {
         navigate("/login");
         return;
       }

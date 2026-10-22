@@ -253,7 +253,8 @@ const RecruiterDashboard = () => {
                 {user.name || "Recruiter"} 👋
               </h1>
               <p className="mt-2 text-sm text-blue-100 sm:text-base">
-                Manage your jobs, candidates and hiring pipeline from one place.
+                Manage your jobs, job seekers and hiring pipeline from one
+                place.
               </p>
             </div>
 
@@ -496,7 +497,7 @@ const RecruiterDashboard = () => {
                 [
                   "/recruiter/applicants",
                   "Applicants",
-                  "Review candidates",
+                  "Review job seekers",
                   Users,
                 ],
               ].map(([path, title, description, Icon]) => (
@@ -578,7 +579,7 @@ const RecruiterDashboard = () => {
                   Recent Applicants
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Latest candidates who applied
+                  Latest job seekers who applied
                 </p>
               </div>
               <Link

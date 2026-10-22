@@ -5,7 +5,7 @@ import axios from "axios";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 
-import API_BASE from "../../config/api";
+import API_BASE from "../../Config/api";
 
 import {
   ArrowLeft,
@@ -217,52 +217,25 @@ const getCandidateId = () => {
 // Get image/logo URL
 // =========================================================
 
-const getAssetUrl = (value) => {
-  if (!value) {
-    return "";
-  }
 
-  let asset = String(value).trim();
+const getAssetUrl = (asset) => {
+  if (!asset) return "";
 
-  if (!asset) {
-    return "";
-  }
-
-  // -------------------------------------------------------
-  // Full HTTP / HTTPS URL
-  // -------------------------------------------------------
-
+  // Agar backend complete URL return karta hai
   if (/^https?:\/\//i.test(asset)) {
-    // Backend may have stored localhost URL.
-    // Convert it to API root based URL.
-    const localhostApiPattern =
-      /^https?:\/\/localhost\/job_portal\/job-portal-api\/?/i;
-
-    if (localhostApiPattern.test(asset)) {
-      asset = asset.replace(
-        localhostApiPattern,
-        ""
-      );
-    } else {
-      return asset;
-    }
+    return asset;
   }
 
-  // -------------------------------------------------------
-  // Normalize slashes
-  // -------------------------------------------------------
+  // Backslashes ko forward slashes mein convert karo
+  let path = String(asset).replace(/\\/g, "/");
 
-  asset = asset.replace(/\\/g, "/");
+  // Starting slashes remove karo
+  path = path.replace(/^\/+/, "");
 
-  asset = asset.replace(/^\/+/, "");
-
-  // -------------------------------------------------------
-  // If backend already returns a full /uploads path,
-  // API_ROOT will be used as base.
-  // -------------------------------------------------------
-
-  return `${API_ROOT}/${asset}`;
+  // API_BASE ko base URL ke roop mein use karo
+  return `${API_BASE.replace(/\/+$/, "")}/${path}`;
 };
+
 
 // =========================================================
 // Format salary

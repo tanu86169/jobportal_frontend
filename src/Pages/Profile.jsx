@@ -524,6 +524,8 @@ const Profile = () => {
   ========================================================= */
 
   const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
     designation: "",
     location: "",
     about: "",
@@ -628,7 +630,7 @@ const Profile = () => {
       }
 
       const response = await axios.get(
-        `${API_BASE}/get.php`,
+        `${API_BASE}/profile/get.php`,
         {
           params: {
             user_id: userId,
@@ -979,6 +981,12 @@ const Profile = () => {
     }
 
     setEditForm({
+      name:
+        profile.name || "",
+
+      phone:
+        profile.phone || "",
+
       designation:
         profile.designation || "",
 
@@ -1580,6 +1588,12 @@ const Profile = () => {
       const payload = {
         user_id: Number(userId),
 
+        name:
+          editForm.name?.trim() || "",
+
+        phone:
+          editForm.phone?.trim() || "",
+
         profile_image:
           profileImageUrl || null,
 
@@ -1649,7 +1663,7 @@ const Profile = () => {
 
       const response =
         await axios.post(
-          `${API_BASE}/save.php`,
+          `${PROFILE_API}/save.php`,
           payload,
           {
             headers: {
@@ -1673,6 +1687,24 @@ const Profile = () => {
       /* =====================================================
          7. SUCCESS
       ===================================================== */
+
+      try {
+        const storedUser = JSON.parse(
+          localStorage.getItem("user") || "null"
+        );
+        if (storedUser) {
+          if (editForm.name?.trim()) {
+            storedUser.name = editForm.name.trim();
+          }
+          if (editForm.phone !== undefined) {
+            storedUser.phone = editForm.phone.trim();
+          }
+          localStorage.setItem("user", JSON.stringify(storedUser));
+          window.dispatchEvent(new Event("loginUpdated"));
+        }
+      } catch (storageErr) {
+        console.warn("Could not update stored user in localStorage:", storageErr);
+      }
 
       setSaveMessage(
         "Profile updated successfully.",
@@ -2656,25 +2688,25 @@ const Profile = () => {
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-                      <ReadOnlyField
-                        label="Name"
-                        value={
-                          profile.name
-                        }
+                      <InputField
+                        label="Full Name"
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleInputChange}
+                        placeholder="Your full name"
                       />
 
                       <ReadOnlyField
-                        label="Email"
-                        value={
-                          profile.email
-                        }
+                        label="Email (Account ID)"
+                        value={profile.email}
                       />
 
-                      <ReadOnlyField
-                        label="Phone"
-                        value={
-                          profile.phone
-                        }
+                      <InputField
+                        label="Phone Number"
+                        name="phone"
+                        value={editForm.phone}
+                        onChange={handleInputChange}
+                        placeholder="+91 9876543210"
                       />
 
                       <SelectField

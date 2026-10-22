@@ -20,6 +20,14 @@ import {
   Save,
   ShieldAlert,
   XCircle,
+  Sparkles,
+  ChevronRight,
+  User,
+  Briefcase,
+  Calendar,
+  Users,
+  FileText,
+  Percent,
 } from "lucide-react";
 
 // =========================================================
@@ -36,68 +44,78 @@ const API_URL = `${API_BASE}/recruiter/company-profile.php`;
 
 const STATUS_CONFIG = {
   pending: {
-    label: "Pending Approval",
+    label: "Pending",
+    fullLabel: "Pending Approval",
     title: "Company Approval Pending",
     message:
       "Your company profile has been submitted and is waiting for admin approval. You cannot post jobs until admin approves your company.",
     icon: Clock3,
-    container: "border-amber-200 bg-amber-50",
+    container: "border-amber-200 bg-amber-50/70",
     iconContainer: "bg-amber-100 text-amber-700",
     titleClass: "text-amber-900",
     textClass: "text-amber-800",
-    badge: "bg-amber-100 text-amber-700",
+    badge: "bg-amber-100 text-amber-700 border-amber-200",
+    accent: "bg-amber-500",
   },
 
   approved: {
     label: "Approved",
+    fullLabel: "Approved",
     title: "Company Approved",
     message:
       "Your company has been approved by admin. You can now post and manage jobs.",
     icon: CheckCircle2,
-    container: "border-green-200 bg-green-50",
-    iconContainer: "bg-green-100 text-green-700",
-    titleClass: "text-green-900",
-    textClass: "text-green-800",
-    badge: "bg-green-100 text-green-700",
+    container: "border-emerald-200 bg-emerald-50/70",
+    iconContainer: "bg-emerald-100 text-emerald-700",
+    titleClass: "text-emerald-900",
+    textClass: "text-emerald-800",
+    badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    accent: "bg-emerald-500",
   },
 
   rejected: {
     label: "Rejected",
+    fullLabel: "Rejected",
     title: "Company Rejected",
     message:
       "Your company application has been rejected by admin. Please contact the administrator for more information.",
     icon: XCircle,
-    container: "border-red-200 bg-red-50",
+    container: "border-red-200 bg-red-50/70",
     iconContainer: "bg-red-100 text-red-700",
     titleClass: "text-red-900",
     textClass: "text-red-800",
-    badge: "bg-red-100 text-red-700",
+    badge: "bg-red-100 text-red-700 border-red-200",
+    accent: "bg-red-500",
   },
 
   suspended: {
     label: "Suspended",
+    fullLabel: "Suspended",
     title: "Company Temporarily Suspended",
     message:
       "Your company has been temporarily suspended by admin. You cannot post jobs until the suspension is removed.",
     icon: ShieldAlert,
-    container: "border-orange-200 bg-orange-50",
+    container: "border-orange-200 bg-orange-50/70",
     iconContainer: "bg-orange-100 text-orange-700",
     titleClass: "text-orange-900",
     textClass: "text-orange-800",
-    badge: "bg-orange-100 text-orange-700",
+    badge: "bg-orange-100 text-orange-700 border-orange-200",
+    accent: "bg-orange-500",
   },
 
   blocked: {
     label: "Blocked",
+    fullLabel: "Blocked",
     title: "Company Blocked",
     message:
       "Your company has been blocked by admin. You cannot post jobs.",
     icon: Ban,
-    container: "border-red-200 bg-red-50",
+    container: "border-red-200 bg-red-50/70",
     iconContainer: "bg-red-100 text-red-700",
     titleClass: "text-red-900",
     textClass: "text-red-800",
-    badge: "bg-red-100 text-red-700",
+    badge: "bg-red-100 text-red-700 border-red-200",
+    accent: "bg-red-500",
   },
 };
 
@@ -255,9 +273,6 @@ const CompanyProfile = () => {
 
   // =======================================================
   // UPDATE LOCAL STORAGE ONLY
-  // IMPORTANT:
-  // Do NOT call setUser() here.
-  // This prevents fetch/useEffect loop.
   // =======================================================
 
   const updateLocalUser = useCallback(
@@ -327,10 +342,6 @@ const CompanyProfile = () => {
           ? data.can_post_job
           : latestStatus === "approved";
 
-      // -----------------------------------------------
-      // FORM DATA
-      // -----------------------------------------------
-
       setFormData({
         company_name:
           data.company_name || "",
@@ -353,10 +364,6 @@ const CompanyProfile = () => {
         description: data.description || "",
       });
 
-      // -----------------------------------------------
-      // COMPANY STATE
-      // -----------------------------------------------
-
       setCompanyId(
         latestCompanyId
       );
@@ -372,10 +379,6 @@ const CompanyProfile = () => {
       setCanPostJob(
         backendCanPost
       );
-
-      // -----------------------------------------------
-      // LOCAL STORAGE
-      // -----------------------------------------------
 
       updateLocalUser({
         company_id:
@@ -407,10 +410,6 @@ const CompanyProfile = () => {
 
   // =======================================================
   // FETCH COMPANY PROFILE
-  //
-  // IMPORTANT:
-  // Only applyCompanyData is dependency.
-  // user is NOT dependency.
   // =======================================================
 
   const fetchProfile = useCallback(
@@ -476,10 +475,6 @@ const CompanyProfile = () => {
           );
         }
 
-        // =================================================
-        // COMPANY FOUND
-        // =================================================
-
         if (
           result?.success &&
           result?.data
@@ -490,10 +485,6 @@ const CompanyProfile = () => {
 
           return true;
         }
-
-        // =================================================
-        // COMPANY NOT FOUND
-        // =================================================
 
         setFormData(
           (previous) => ({
@@ -534,10 +525,6 @@ const CompanyProfile = () => {
           "Fetch Company Profile Error:",
           err
         );
-
-        // =================================================
-        // LOCAL STORAGE FALLBACK
-        // =================================================
 
         try {
           const storedUser =
@@ -607,9 +594,6 @@ const CompanyProfile = () => {
 
   // =======================================================
   // LOAD USER + INITIAL PROFILE
-  //
-  // This effect will NOT loop because fetchProfile
-  // has stable dependencies.
   // =======================================================
 
   useEffect(() => {
@@ -632,10 +616,6 @@ const CompanyProfile = () => {
 
       setUser(parsedUser);
 
-      // -----------------------------------------------
-      // ROLE CHECK
-      // -----------------------------------------------
-
       const role = String(
         parsedUser?.role || ""
       )
@@ -652,10 +632,6 @@ const CompanyProfile = () => {
         return;
       }
 
-      // -----------------------------------------------
-      // RECRUITER ID
-      // -----------------------------------------------
-
       const recruiterId =
         getRecruiterIdFromUser(
           parsedUser
@@ -670,10 +646,6 @@ const CompanyProfile = () => {
 
         return;
       }
-
-      // -----------------------------------------------
-      // LOCAL STATUS FIRST
-      // -----------------------------------------------
 
       const localStatus =
         normalizeStatus(
@@ -707,10 +679,6 @@ const CompanyProfile = () => {
         parsedUser?.company_id ||
           null
       );
-
-      // -----------------------------------------------
-      // FETCH FRESH DATA
-      // -----------------------------------------------
 
       fetchProfile(
         recruiterId,
@@ -807,10 +775,6 @@ const CompanyProfile = () => {
         return;
       }
 
-      // -----------------------------------------------
-      // CLEAN VALUES
-      // -----------------------------------------------
-
       const companyName =
         String(
           formData.company_name ||
@@ -849,10 +813,6 @@ const CompanyProfile = () => {
             ""
         ).trim();
 
-      // -----------------------------------------------
-      // COMPANY NAME
-      // -----------------------------------------------
-
       if (!companyName) {
         setError(
           "Company name is required."
@@ -860,10 +820,6 @@ const CompanyProfile = () => {
 
         return;
       }
-
-      // -----------------------------------------------
-      // EMAIL
-      // -----------------------------------------------
 
       if (
         email &&
@@ -877,10 +833,6 @@ const CompanyProfile = () => {
 
         return;
       }
-
-      // -----------------------------------------------
-      // WEBSITE
-      // -----------------------------------------------
 
       if (
         website &&
@@ -913,10 +865,6 @@ const CompanyProfile = () => {
 
       try {
         setSaving(true);
-
-        // ---------------------------------------------
-        // API REQUEST
-        // ---------------------------------------------
 
         const response =
           await fetch(
@@ -989,10 +937,6 @@ const CompanyProfile = () => {
         const savedData =
           result?.data || {};
 
-        // ---------------------------------------------
-        // STATUS
-        // ---------------------------------------------
-
         const latestStatus =
           normalizeStatus(
             savedData.status ||
@@ -1002,10 +946,6 @@ const CompanyProfile = () => {
               "pending"
           );
 
-        // ---------------------------------------------
-        // COMPANY ID
-        // ---------------------------------------------
-
         const latestCompanyId =
           savedData.company_id ??
           savedData.id ??
@@ -1013,20 +953,12 @@ const CompanyProfile = () => {
           companyId ??
           null;
 
-        // ---------------------------------------------
-        // POST JOB PERMISSION
-        // ---------------------------------------------
-
         const latestCanPost =
           typeof savedData.can_post_job ===
           "boolean"
             ? savedData.can_post_job
             : latestStatus ===
               "approved";
-
-        // ---------------------------------------------
-        // STATUS MESSAGE
-        // ---------------------------------------------
 
         const latestStatusMessage =
           getStatusMessage(
@@ -1038,10 +970,6 @@ const CompanyProfile = () => {
               result?.company_message ||
               ""
           );
-
-        // ---------------------------------------------
-        // UPDATE STATE
-        // ---------------------------------------------
 
         setCompanyId(
           latestCompanyId
@@ -1058,10 +986,6 @@ const CompanyProfile = () => {
         setCanPostJob(
           latestCanPost
         );
-
-        // ---------------------------------------------
-        // UPDATE FORM
-        // ---------------------------------------------
 
         setFormData({
           company_name:
@@ -1098,10 +1022,6 @@ const CompanyProfile = () => {
             description,
         });
 
-        // ---------------------------------------------
-        // UPDATE LOCAL STORAGE
-        // ---------------------------------------------
-
         updateLocalUser({
           company_id:
             latestCompanyId,
@@ -1127,10 +1047,6 @@ const CompanyProfile = () => {
             savedData.phone ??
             phone,
         });
-
-        // ---------------------------------------------
-        // SUCCESS MESSAGE
-        // ---------------------------------------------
 
         setMessage(
           result?.message ||
@@ -1238,200 +1154,97 @@ const CompanyProfile = () => {
   // =======================================================
 
   return (
-    <div className="w-full min-w-0">
-      {/* =================================================
-          HEADER
-      ================================================= */}
-
-      <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-6 py-7 sm:px-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white shadow-inner backdrop-blur">
-                <Building2 size={28} />
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">
-                  Recruiter Workspace
-                </p>
-
-                <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                  Company Profile
-                </h1>
-
-                <p className="mt-1 text-sm text-blue-100">
-                  Manage your company information and approval status.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white backdrop-blur transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RefreshCw
-                  size={15}
-                  className={
-                    refreshing
-                      ? "animate-spin"
-                      : ""
-                  }
-                />
-
-                {refreshing
-                  ? "Refreshing..."
-                  : "Refresh"}
-              </button>
-
-              <span
-                className={`rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wide ${statusConfig.badge}`}
-              >
-                {statusConfig.label}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* PROFILE COMPLETION */}
-
-        <div className="px-6 py-5 sm:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                Profile Completion
-              </p>
-
-              <p className="mt-1 text-sm font-bold text-slate-700">
-                Complete your company profile
-              </p>
-            </div>
-
-            <p className="text-lg font-black text-blue-600">
-              {completion}%
-            </p>
-          </div>
-
-          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-500"
-              style={{
-                width: `${completion}%`,
-              }}
-            />
-          </div>
-
-          <p className="mt-2 text-xs text-slate-400">
-            A complete profile helps candidates understand your company better.
-          </p>
-        </div>
-      </div>
-
+    <div className="w-full min-w-0 space-y-6">
+    
       {/* =================================================
           STATUS CARD
       ================================================= */}
 
-      <div
-        className={`mb-6 rounded-3xl border p-5 shadow-sm sm:p-6 ${statusConfig.container}`}
-      >
-        <div className="flex items-start gap-4">
-          <div
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${statusConfig.iconContainer}`}
-          >
-            <StatusIcon size={22} />
-          </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                className={`text-base font-black ${statusConfig.titleClass}`}
-              >
-                {statusConfig.title}
-              </h2>
+<div
+  className={`overflow-hidden rounded-3xl border shadow-sm ${statusConfig.container}`}
+>
+  <div className="flex items-start gap-4 p-6 sm:p-7">
+    <div
+      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${statusConfig.iconContainer}`}
+    >
+      <StatusIcon size={26} />
+    </div>
 
-              {companyId && (
-                <span
-                  className={`rounded-full bg-white/70 px-3 py-1 text-[11px] font-bold ${statusConfig.textClass}`}
-                >
-                  Company ID: {companyId}
-                </span>
-              )}
-            </div>
+    <div className="min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2
+          className={`text-lg font-black ${statusConfig.titleClass}`}
+        >
+          {statusConfig.title}
+        </h2>
 
-            <p
-              className={`mt-1 text-sm leading-6 ${statusConfig.textClass}`}
-            >
-              {companyStatusMessage ||
-                statusConfig.message}
-            </p>
-
-            {normalizedStatus ===
-              "approved" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2.5 text-xs font-black text-green-700 shadow-sm">
-                <CheckCircle2
-                  size={16}
-                />
-                You can post jobs
-              </div>
-            )}
-
-            {normalizedStatus ===
-              "pending" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2.5 text-xs font-bold text-amber-700">
-                <Clock3 size={16} />
-                Waiting for admin approval
-              </div>
-            )}
-
-            {normalizedStatus ===
-              "rejected" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2.5 text-xs font-bold text-red-700">
-                <XCircle size={16} />
-                Contact admin for more information
-              </div>
-            )}
-
-            {normalizedStatus ===
-              "suspended" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2.5 text-xs font-bold text-orange-700">
-                <ShieldAlert
-                  size={16}
-                />
-                Job posting is temporarily disabled
-              </div>
-            )}
-
-            {normalizedStatus ===
-              "blocked" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2.5 text-xs font-bold text-red-700">
-                <Ban size={16} />
-                Job posting is blocked
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Company ID is intentionally hidden from the website UI */}
       </div>
+
+      <p
+        className={`mt-2 text-sm leading-6 ${statusConfig.textClass}`}
+      >
+        {companyStatusMessage || statusConfig.message}
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {normalizedStatus === "approved" && (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-black text-emerald-700 shadow-sm">
+            <CheckCircle2 size={15} />
+            You can post jobs
+          </div>
+        )}
+
+        {normalizedStatus === "pending" && (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-bold text-amber-700 shadow-sm">
+            <Clock3 size={15} />
+            Waiting for admin approval
+          </div>
+        )}
+
+        {normalizedStatus === "rejected" && (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-bold text-red-700 shadow-sm">
+            <XCircle size={15} />
+            Contact admin for more information
+          </div>
+        )}
+
+        {normalizedStatus === "suspended" && (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-bold text-orange-700 shadow-sm">
+            <ShieldAlert size={15} />
+            Job posting is temporarily disabled
+          </div>
+        )}
+
+        {normalizedStatus === "blocked" && (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-bold text-red-700 shadow-sm">
+            <Ban size={15} />
+            Job posting is blocked
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
       {/* =================================================
           SUCCESS
       ================================================= */}
 
       {message && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 shadow-sm">
-          <CheckCircle2
-            size={19}
-            className="mt-0.5 shrink-0 text-green-600"
-          />
+        <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <CheckCircle2 size={18} />
+          </div>
 
-          <div>
-            <p className="font-black">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-black text-emerald-900">
               Success
             </p>
-
-            <p className="mt-1 leading-6">
+            <p className="mt-0.5 text-sm leading-6 text-emerald-800">
               {message}
             </p>
           </div>
@@ -1443,27 +1256,23 @@ const CompanyProfile = () => {
       ================================================= */}
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
-          <AlertTriangle
-            size={19}
-            className="mt-0.5 shrink-0 text-red-600"
-          />
+        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700">
+            <AlertTriangle size={18} />
+          </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-black">
+            <p className="text-sm font-black text-red-900">
               Something went wrong
             </p>
-
-            <p className="mt-1 leading-6">
+            <p className="mt-0.5 text-sm leading-6 text-red-800">
               {error}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() =>
-              setError("")
-            }
+            onClick={() => setError("")}
             className="rounded-lg p-1 text-red-500 transition hover:bg-red-100"
             aria-label="Close error"
           >
@@ -1481,11 +1290,10 @@ const CompanyProfile = () => {
         className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
       >
         {/* FORM HEADER */}
-
-        <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Building2 size={19} />
+        <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-6 sm:px-8">
+          <div className="flex items-start gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm">
+              <Building2 size={20} />
             </div>
 
             <div>
@@ -1494,227 +1302,292 @@ const CompanyProfile = () => {
               </h2>
 
               <p className="mt-1 text-sm leading-6 text-slate-500">
-                Keep your company information accurate so candidates can understand your organization.
+                Keep your company information accurate so candidates can
+                understand your organization.
               </p>
             </div>
           </div>
         </div>
 
         {/* FORM BODY */}
-
         <div className="p-6 sm:p-8">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* COMPANY NAME */}
-
-            <div>
-              <label
-                htmlFor="company_name"
-                className="text-sm font-bold text-slate-700"
-              >
-                Company Name
-                <span className="ml-1 text-red-500">
-                  *
-                </span>
-              </label>
-
-              <div className="relative mt-2">
-                <Building2
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  id="company_name"
-                  type="text"
-                  name="company_name"
-                  value={
-                    formData.company_name
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="Enter company name"
-                  required
-                  maxLength={255}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                />
-              </div>
-            </div>
-
-            {/* EMAIL */}
-
-            <div>
-              <label
-                htmlFor="email"
-                className="text-sm font-bold text-slate-700"
-              >
-                Company Email
-              </label>
-
-              <div className="relative mt-2">
-                <Mail
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={
-                    formData.email
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="company@example.com"
-                  maxLength={255}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                />
-              </div>
-            </div>
-
-            {/* PHONE */}
-
-            <div>
-              <label
-                htmlFor="phone"
-                className="text-sm font-bold text-slate-700"
-              >
-                Phone Number
-              </label>
-
-              <div className="relative mt-2">
-                <Phone
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={
-                    formData.phone
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="+91 XXXXX XXXXX"
-                  maxLength={30}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                />
-              </div>
-            </div>
-
-            {/* LOCATION */}
-
-            <div>
-              <label
-                htmlFor="location"
-                className="text-sm font-bold text-slate-700"
-              >
-                Location
-              </label>
-
-              <div className="relative mt-2">
-                <MapPin
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  id="location"
-                  type="text"
-                  name="location"
-                  value={
-                    formData.location
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="Lucknow, India"
-                  maxLength={255}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                />
-              </div>
-            </div>
-
-            {/* INDUSTRY */}
-            <div>
-              <label htmlFor="industry" className="text-sm font-bold text-slate-700">Industry</label>
-              <div className="relative mt-2">
-                <Building2 size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input id="industry" type="text" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g. Information Technology" maxLength={150} className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
-              </div>
-            </div>
-
-            {/* COMPANY SIZE */}
-            <div>
-              <label htmlFor="company_size" className="text-sm font-bold text-slate-700">Company Size</label>
-              <div className="relative mt-2">
-                <select id="company_size" name="company_size" value={formData.company_size} onChange={handleChange} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
-                  <option value="">Select company size</option>
-                  <option value="1-10">1-10 employees</option>
-                  <option value="11-50">11-50 employees</option>
-                  <option value="51-200">51-200 employees</option>
-                  <option value="201-500">201-500 employees</option>
-                  <option value="501-1000">501-1000 employees</option>
-                  <option value="1001-5000">1001-5000 employees</option>
-                  <option value="5001-10000">5001-10000 employees</option>
-                  <option value="10001+">10001+ employees</option>
-                </select>
-              </div>
-            </div>
-
-            {/* FOUNDED YEAR */}
-            <div>
-              <label htmlFor="founded_year" className="text-sm font-bold text-slate-700">Founded Year</label>
-              <div className="relative mt-2">
-                <input id="founded_year" type="number" name="founded_year" value={formData.founded_year} onChange={handleChange} placeholder="e.g. 2015" min="1800" max={new Date().getFullYear()} inputMode="numeric" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
-              </div>
-            </div>
-
-            {/* WEBSITE */}
-            <div className="md:col-span-2">
-              <label
-                htmlFor="website"
-                className="text-sm font-bold text-slate-700"
-              >
-                Company Website
-              </label>
-
-              <div className="relative mt-2">
-                <Globe
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  id="website"
-                  type="url"
-                  name="website"
-                  value={
-                    formData.website
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="https://www.example.com"
-                  maxLength={500}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                />
-              </div>
-
-              <p className="mt-2 text-xs text-slate-400">
-                Example:
-                https://www.yourcompany.com
+          {/* SECTION: BASIC INFO */}
+          <div className="mb-8">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="h-px flex-1 bg-slate-100" />
+              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">
+                Basic Information
               </p>
+              <div className="h-px flex-1 bg-slate-100" />
             </div>
 
-            {/* DESCRIPTION */}
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* COMPANY NAME */}
+              <div>
+                <label
+                  htmlFor="company_name"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Company Name
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
 
-            <div className="md:col-span-2">
+                <div className="relative mt-2">
+                  <Building2
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="company_name"
+                    type="text"
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleChange}
+                    placeholder="Enter company name"
+                    required
+                    maxLength={255}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+
+              {/* EMAIL */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Company Email
+                </label>
+
+                <div className="relative mt-2">
+                  <Mail
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="company@example.com"
+                    maxLength={255}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+
+              {/* PHONE */}
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Phone Number
+                </label>
+
+                <div className="relative mt-2">
+                  <Phone
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+91 XXXXX XXXXX"
+                    maxLength={30}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+
+              {/* LOCATION */}
+              <div>
+                <label
+                  htmlFor="location"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Location
+                </label>
+
+                <div className="relative mt-2">
+                  <MapPin
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Lucknow, India"
+                    maxLength={255}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION: COMPANY DETAILS */}
+          <div className="mb-8">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="h-px flex-1 bg-slate-100" />
+              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">
+                Company Details
+              </p>
+              <div className="h-px flex-1 bg-slate-100" />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* INDUSTRY */}
+              <div>
+                <label
+                  htmlFor="industry"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Industry
+                </label>
+
+                <div className="relative mt-2">
+                  <Briefcase
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="industry"
+                    type="text"
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleChange}
+                    placeholder="e.g. Information Technology"
+                    maxLength={150}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+
+              {/* COMPANY SIZE */}
+              <div>
+                <label
+                  htmlFor="company_size"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Company Size
+                </label>
+
+                <div className="relative mt-2">
+                  <Users
+                    size={18}
+                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <select
+                    id="company_size"
+                    name="company_size"
+                    value={formData.company_size}
+                    onChange={handleChange}
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-10 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  >
+                    <option value="">Select company size</option>
+                    <option value="1-10">1-10 employees</option>
+                    <option value="11-50">11-50 employees</option>
+                    <option value="51-200">51-200 employees</option>
+                    <option value="201-500">201-500 employees</option>
+                    <option value="501-1000">501-1000 employees</option>
+                    <option value="1001-5000">1001-5000 employees</option>
+                    <option value="5001-10000">5001-10000 employees</option>
+                    <option value="10001+">10001+ employees</option>
+                  </select>
+
+                  <ChevronRight
+                    size={18}
+                    className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rotate-90 text-slate-400"
+                  />
+                </div>
+              </div>
+
+              {/* FOUNDED YEAR */}
+              <div>
+                <label
+                  htmlFor="founded_year"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Founded Year
+                </label>
+
+                <div className="relative mt-2">
+                  <Calendar
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="founded_year"
+                    type="number"
+                    name="founded_year"
+                    value={formData.founded_year}
+                    onChange={handleChange}
+                    placeholder="e.g. 2015"
+                    min="1800"
+                    max={new Date().getFullYear()}
+                    inputMode="numeric"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+
+              {/* WEBSITE */}
+              <div>
+                <label
+                  htmlFor="website"
+                  className="text-sm font-bold text-slate-700"
+                >
+                  Company Website
+                </label>
+
+                <div className="relative mt-2">
+                  <Globe
+                    size={18}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="website"
+                    type="url"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    placeholder="https://www.example.com"
+                    maxLength={500}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION: DESCRIPTION */}
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="h-px flex-1 bg-slate-100" />
+              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">
+                About Company
+              </p>
+              <div className="h-px flex-1 bg-slate-100" />
+            </div>
+
+            <div>
               <div className="flex items-center justify-between gap-3">
                 <label
                   htmlFor="description"
@@ -1725,44 +1598,42 @@ const CompanyProfile = () => {
 
                 <span
                   className={`text-xs font-bold ${
-                    formData.description
-                      .length >= 900
+                    formData.description.length >= 900
                       ? "text-amber-600"
                       : "text-slate-400"
                   }`}
                 >
-                  {
-                    formData.description
-                      .length
-                  }
-                  /1000
+                  {formData.description.length}/1000
                 </span>
               </div>
 
-              <textarea
-                id="description"
-                name="description"
-                value={
-                  formData.description
-                }
-                onChange={
-                  handleChange
-                }
-                maxLength={1000}
-                rows={6}
-                placeholder="Tell candidates about your company, products, services, culture and what makes your organization a great place to work..."
-                className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-              />
+              <div className="relative mt-2">
+                <FileText
+                  size={18}
+                  className="absolute left-3.5 top-4 text-slate-400"
+                />
+
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  maxLength={1000}
+                  rows={6}
+                  placeholder="Tell candidates about your company, products, services, culture and what makes your organization a great place to work..."
+                  className="w-full resize-y rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                />
+              </div>
 
               <p className="mt-2 text-xs leading-5 text-slate-400">
-                A clear company description helps candidates understand your organization before applying.
+                A clear company description helps candidates understand your
+                organization before applying.
               </p>
             </div>
           </div>
 
           {/* SAVE AREA */}
-
-          <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div className="flex items-start gap-2 text-xs leading-5 text-slate-500">
               <ShieldAlert
                 size={15}
@@ -1770,24 +1641,19 @@ const CompanyProfile = () => {
               />
 
               <span>
-                <strong className="text-slate-700">
-                  Note:
-                </strong>{" "}
-                Company approval status can only be changed by an administrator.
+                <strong className="text-slate-700">Note:</strong> Company
+                approval status can only be changed by an administrator.
               </span>
             </div>
 
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex min-w-[160px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-w-[160px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl hover:shadow-blue-500/25 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 <>
-                  <Loader2
-                    size={18}
-                    className="animate-spin"
-                  />
+                  <Loader2 size={18} className="animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -1806,36 +1672,32 @@ const CompanyProfile = () => {
       ================================================= */}
 
       <div
-        className={`mt-6 rounded-3xl border p-5 shadow-sm sm:p-6 ${
+        className={`overflow-hidden rounded-3xl border shadow-sm ${
           canPostJob
-            ? "border-green-200 bg-green-50"
-            : "border-amber-200 bg-amber-50"
+            ? "border-emerald-200 bg-emerald-50/70"
+            : "border-amber-200 bg-amber-50/70"
         }`}
       >
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 p-6 sm:p-7">
           <div
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${
               canPostJob
-                ? "bg-green-100 text-green-700"
+                ? "bg-emerald-100 text-emerald-700"
                 : "bg-amber-100 text-amber-700"
             }`}
           >
             {canPostJob ? (
-              <CheckCircle2 size={22} />
+              <CheckCircle2 size={26} />
             ) : (
-              <AlertTriangle
-                size={22}
-              />
+              <AlertTriangle size={26} />
             )}
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3
-                className={`text-sm font-black ${
-                  canPostJob
-                    ? "text-green-900"
-                    : "text-amber-900"
+                className={`text-lg font-black ${
+                  canPostJob ? "text-emerald-900" : "text-amber-900"
                 }`}
               >
                 Job Posting Permission
@@ -1844,21 +1706,17 @@ const CompanyProfile = () => {
               <span
                 className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
                   canPostJob
-                    ? "bg-green-100 text-green-700"
-                    : "bg-amber-100 text-amber-700"
+                    ? "bg-emerald-200 text-emerald-800"
+                    : "bg-amber-200 text-amber-800"
                 }`}
               >
-                {canPostJob
-                  ? "Enabled"
-                  : "Disabled"}
+                {canPostJob ? "Enabled" : "Disabled"}
               </span>
             </div>
 
             <p
               className={`mt-2 text-sm leading-6 ${
-                canPostJob
-                  ? "text-green-800"
-                  : "text-amber-800"
+                canPostJob ? "text-emerald-800" : "text-amber-800"
               }`}
             >
               {canPostJob
@@ -1873,19 +1731,25 @@ const CompanyProfile = () => {
           COMPANY STATUS GUIDE
       ================================================= */}
 
-      <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-        <div className="mb-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">
-            Approval Process
-          </p>
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+        <div className="mb-5 flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <Sparkles size={18} />
+          </div>
 
-          <h3 className="mt-1 text-lg font-black text-slate-900">
-            How company approval works
-          </h3>
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-blue-600">
+              Approval Process
+            </p>
 
-          <p className="mt-1 text-sm leading-6 text-slate-500">
-            Your company status is controlled by the admin team.
-          </p>
+            <h3 className="mt-1 text-lg font-black text-slate-900">
+              How company approval works
+            </h3>
+
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Your company status is controlled by the admin team.
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -1893,53 +1757,48 @@ const CompanyProfile = () => {
             {
               key: "pending",
               label: "Pending",
-              description:
-                "Waiting for admin review.",
+              description: "Waiting for admin review.",
             },
             {
               key: "approved",
               label: "Approved",
-              description:
-                "Job posting is enabled.",
+              description: "Job posting is enabled.",
             },
             {
               key: "rejected",
               label: "Rejected",
-              description:
-                "Company was not approved.",
+              description: "Company was not approved.",
             },
             {
               key: "suspended",
               label: "Suspended",
-              description:
-                "Temporarily restricted.",
+              description: "Temporarily restricted.",
             },
             {
               key: "blocked",
               label: "Blocked",
-              description:
-                "Access to job posting is blocked.",
+              description: "Access to job posting is blocked.",
             },
           ].map((item) => {
-            const config =
-              STATUS_CONFIG[item.key];
-
-            const Icon =
-              config.icon;
-
-            const isCurrent =
-              normalizedStatus ===
-              item.key;
+            const config = STATUS_CONFIG[item.key];
+            const Icon = config.icon;
+            const isCurrent = normalizedStatus === item.key;
 
             return (
               <div
                 key={item.key}
-                className={`rounded-2xl border p-4 transition ${
+                className={`relative overflow-hidden rounded-2xl border p-4 transition ${
                   isCurrent
-                    ? `${config.container} ring-2 ring-blue-500/10`
-                    : "border-slate-100 bg-slate-50"
+                    ? `${config.container} ring-2 ring-blue-500/20`
+                    : "border-slate-100 bg-slate-50/50"
                 }`}
               >
+                {isCurrent && (
+                  <div
+                    className={`absolute inset-x-0 top-0 h-1 ${config.accent}`}
+                  />
+                )}
+
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-xl ${config.iconContainer}`}
                 >
